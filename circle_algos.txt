@@ -1,0 +1,15 @@
+Bresenham's circle algorithm
+https://lectureloops.com/bresenhams-circle-drawing-algorithm/
+https://arcade.makecode.com/graphics-math/bresenham-circle
+http://members.chello.at/~easyfilter/bresenham.html
+    d = 2 * (x + 1)^2 + Yi^2 + (y - 1)^2 - 2 * radius^2
+
+Midpoint Circle Algorithm
+https://lectureloops.com/mid-point-circle-drawing-algorithm/
+    d = (x+1)^2 + (y-0.5)^2 - r^2
+https://www.gatevidyalay.com/mid-point-circle-drawing-algorithm/
+
+Wu Antialiasing
+http://www.landkey.net/d/antialiased/wu4_RF/
+https://yellowsplash.wordpress.com/2009/10/23/fast-antialiased-circles-and-ellipses-from-xiaolin-wus-concepts/
+https://create.stephan-brumme.com/antialiased-circle/
