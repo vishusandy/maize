@@ -512,7 +512,6 @@ pub(crate) mod tests {
         //     draw_mp(&mut image, r, c, oct_fn(o), image::Rgba([0, 0, 255, 255]));
         // }
         // return image.save("images/tests/full_quad_arc.png");
-        let mut i = 0;
         let mut x: i32 = 0;
         let mut y: i32 = r;
         let mut d: i32 = 1 - r;
@@ -531,8 +530,7 @@ pub(crate) mod tests {
             if quad == 3 {
                 // if x >= 0 && y >= 0 {
                 println!("x={} y={} d={}", x, y, d);
-                if y == 0 || i > 140 {
-                    i = 0;
+                if y == 0 {
                     x = r;
                     y = 0;
                     d = 1 - r;
@@ -564,8 +562,7 @@ pub(crate) mod tests {
             // } else if x >= 0 && y < 0 {
             } else if quad == 0 {
                 // octect 0
-                if x == 0 || i > 140 {
-                    i = 0;
+                if x == 0 {
                     x = 0;
                     y = -r;
                     d = 1 - r;
@@ -589,8 +586,7 @@ pub(crate) mod tests {
                     }
                 }
             } else if quad == 1 {
-                if y == 0 || i > 140 {
-                    i = 0;
+                if y == 0 {
                     x = -r;
                     y = 0;
                     d = 1 - r;
@@ -614,7 +610,7 @@ pub(crate) mod tests {
                     }
                 }
             } else if quad == 2 {
-                if x == 0 || i > 140 {
+                if x == 0 {
                     break;
                 }
                 if -x > y {
@@ -638,7 +634,6 @@ pub(crate) mod tests {
                 println!("invalid quadrant");
                 break;
             }
-            i += 1;
         }
 
         image.save("images/tests/full_quad_arc.png")
