@@ -507,10 +507,19 @@ pub(crate) mod tests {
         let c: (i32, i32) = (IMG_SIZE as i32 / 2, IMG_SIZE as i32 / 2);
         let r: i32 = 150;
 
+        imageproc::drawing::draw_hollow_circle_mut(&mut image, c, r, image::Rgba([0, 0, 255, 255]));
+        // for o in 0..8 {
+        //     draw_mp(&mut image, r, c, oct_fn(o), image::Rgba([0, 0, 255, 255]));
+        // }
+        // return image.save("images/tests/full_quad_arc.png");
+        let mut i = 0;
         let mut x: i32 = 0;
         let mut y: i32 = r;
         let mut d: i32 = 1 - r;
         let mut quad: u8 = 3;
+
+        // p = (x+1)² + (y - ½)² - r²
+
         loop {
             // println!("x={} y={}", x, y);
             image.put_pixel(
@@ -518,38 +527,45 @@ pub(crate) mod tests {
                 (y + c.1) as u32,
                 image::Rgba([255, 0, 0, 255]),
             );
+
             if quad == 3 {
                 // if x >= 0 && y >= 0 {
-                if y == 0 {
+                println!("x={} y={} d={}", x, y, d);
+                if y == 0 || i > 140 {
+                    i = 0;
                     x = r;
-                    y = -1;
+                    y = 0;
                     d = 1 - r;
                     quad = 0;
                 }
                 if x < y {
                     // octect 7
                     x += 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * x + 1;
+                        // d = ((x + 1) * (x + 1)) + (y as f64 - 0.5).powi(2).round() as i32 - (r * r);
                     } else {
                         y -= 1;
                         d += 2 * (x - y) + 1;
+                        // d = ((x + 1) * (x + 1)) + (y as f64 - 0.5).powi(2).round() as i32 - (r * r);
                     }
                 } else {
                     // octect 8
                     y -= 1;
                     if d <= 0 {
                         d += 2 * y + 1;
+                        // d = ((x + 1) * (x + 1)) + (y as f64 - 0.5).powi(2).round() as i32 - (r * r);
                     } else {
                         x += 1;
                         d += 2 * (y - x) + 1;
+                        // d = ((x + 1) * (x + 1)) + (y as f64 - 0.5).powi(2).round() as i32 - (r * r);
                     }
                 }
             // } else if x >= 0 && y < 0 {
             } else if quad == 0 {
                 // octect 0
-                if x == 0 {
-                    println!("finished quad 0");
+                if x == 0 || i > 140 {
+                    i = 0;
                     x = 0;
                     y = -r;
                     d = 1 - r;
@@ -557,7 +573,7 @@ pub(crate) mod tests {
                 }
                 if y > -x {
                     y -= 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * -y - 1;
                     } else {
                         x -= 1;
@@ -565,7 +581,7 @@ pub(crate) mod tests {
                     }
                 } else {
                     x -= 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * x - 1;
                     } else {
                         y -= 1;
@@ -573,8 +589,8 @@ pub(crate) mod tests {
                     }
                 }
             } else if quad == 1 {
-                if y == 0 {
-                    println!("finished quad 1");
+                if y == 0 || i > 140 {
+                    i = 0;
                     x = -r;
                     y = 0;
                     d = 1 - r;
@@ -582,7 +598,7 @@ pub(crate) mod tests {
                 }
                 if x > y {
                     x -= 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * -x - 1;
                     } else {
                         y += 1;
@@ -590,7 +606,7 @@ pub(crate) mod tests {
                     }
                 } else {
                     y += 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * -y - 1;
                     } else {
                         x -= 1;
@@ -598,13 +614,12 @@ pub(crate) mod tests {
                     }
                 }
             } else if quad == 2 {
-                if x == 0 {
+                if x == 0 || i > 140 {
                     break;
                 }
-                println!("quad=2 x={} y={}", x, y);
                 if -x > y {
                     y += 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * y + 1;
                     } else {
                         x += 1;
@@ -612,7 +627,7 @@ pub(crate) mod tests {
                     }
                 } else {
                     x += 1;
-                    if d < 0 {
+                    if d <= 0 {
                         d += 2 * -x + 1;
                     } else {
                         y += 1;
@@ -623,6 +638,7 @@ pub(crate) mod tests {
                 println!("invalid quadrant");
                 break;
             }
+            i += 1;
         }
 
         image.save("images/tests/full_quad_arc.png")

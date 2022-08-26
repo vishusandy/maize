@@ -13,6 +13,7 @@ pub(crate) mod wu;
 // Midpoint Circle Algorithm
 // https://lectureloops.com/mid-point-circle-drawing-algorithm/
 //      d = (x+1)^2 + (y-0.5)^2 - r^2
+//      p = (x+1)² + (y - ½)² - r²
 
 // Wu Antialiasing
 // http://www.landkey.net/d/antialiased/wu4_RF/
