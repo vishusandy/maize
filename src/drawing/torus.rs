@@ -90,7 +90,7 @@ mod tests {
     fn torus() -> Result<(), image::ImageError> {
         let mut image =
             image::RgbaImage::from_vec(400, 400, Vec::from([255; 400 * 400 * 4])).unwrap();
-        let torus = TorusSlice::new((200.0, 200.0), PI * 0.1, PI * 0.55, 50.0, 80.0);
+        let torus = TorusSlice::new((200.0, 200.0), PI * 0.1, PI * 1.8, 50.0, 80.0);
         let (x, y) = torus.a();
         image.put_pixel(
             x.round() as u32,

@@ -1,8 +1,15 @@
+
+Adjust of Midpoint circle algorithm for aesthetics
+  https://stackoverflow.com/questions/36897585/slightly-change-the-bresenham-midpoint-circle-algorithm-for-nicer-results
+    https://jsfiddle.net/7ru55fa3/9/
+
 Bresenham's circle algorithm
+https://www.everettgaius.com/article/how-draw-circle-midpoint-and-bresenhams-algorithm
 https://lectureloops.com/bresenhams-circle-drawing-algorithm/
 https://arcade.makecode.com/graphics-math/bresenham-circle
 http://members.chello.at/~easyfilter/bresenham.html
     d = 2 * (x + 1)^2 + Yi^2 + (y - 1)^2 - 2 * radius^2
+
 
 Midpoint Circle Algorithm
 https://lectureloops.com/mid-point-circle-drawing-algorithm/
@@ -13,3 +20,45 @@ Wu Antialiasing
 http://www.landkey.net/d/antialiased/wu4_RF/
 https://yellowsplash.wordpress.com/2009/10/23/fast-antialiased-circles-and-ellipses-from-xiaolin-wus-concepts/
 https://create.stephan-brumme.com/antialiased-circle/
+
+
+
+
+// Pie Slices
+// https://stackoverflow.com/questions/58222657/generate-a-pieslice-in-c-without-using-the-pieslice-of-graphics-h
+
+// Libraries
+//  Pillow (python)
+//      https://github.com/python-pillow/Pillow/blob/38931c1e475fb2bd6f10daa2aafe18ec2f526955/src/libImaging/Draw.c
+
+// Bresenham's circle algorithm
+// https://www.everettgaius.com/article/how-draw-circle-midpoint-and-bresenhams-algorithm
+// https://arcade.makecode.com/graphics-math/bresenham-circle
+// http://members.chello.at/~easyfilter/bresenham.html
+//      d = 2 * (x + 1)^2 + Yi^2 + (y - 1)^2 - 2 * radius^2
+// https://stackoverflow.com/questions/41524497/c-sdl2-rendering-a-circle
+
+// Midpoint Circle Algorithm
+// https://www.everettgaius.com/article/how-draw-circle-midpoint-and-bresenhams-algorithm
+// https://lectureloops.com/mid-point-circle-drawing-algorithm/
+//      d = (x+1)^2 + (y-0.5)^2 - r^2
+//      p = (x+1)² + (y - ½)² - r²
+// https://www.geeksforgeeks.org/mid-point-circle-drawing-algorithm/
+// https://www.javatpoint.com/computer-graphics-midpoint-circle-algorithm
+
+// Wu Antialiasing
+// http://www.landkey.net/d/antialiased/wu4_RF/
+// https://yellowsplash.wordpress.com/2009/10/23/fast-antialiased-circles-and-ellipses-from-xiaolin-wus-concepts/
+// https://create.stephan-brumme.com/antialiased-circle/
+
+// More on Antialiasing
+//  http://www.verycomputer.com/279_dbc8efa147526a04_1.htm
+//      Pitteway and Watkinson
+//
+// https://web.cs.wpi.edu/~matt/courses/cs563/talks/antialiasing/methods.html
+
+// Fast Inverse Square Root
+// https://onestepcode.com/benchmarking-fast-inverse-square-root/
+// https://en.wikipedia.org/wiki/Fast_inverse_square_root
+// https://www.linkedin.com/pulse/fast-inverse-square-root-still-armin-kassemi-langroodi
+

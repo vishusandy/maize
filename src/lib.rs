@@ -8,10 +8,6 @@ mod error;
 mod graphs;
 mod render;
 
-pub mod bench {
-    pub use crate::drawing::octs::tests::draw_arc_iter;
-}
-
 const DEFAULT_NEIGHBORS: usize = 6;
 
 #[cfg(test)]
