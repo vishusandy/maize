@@ -5,7 +5,7 @@ use crate::render::{RenderBlock, RenderGraph};
 use image::{Rgba, RgbaImage};
 
 #[derive(Clone, Debug)]
-struct Orth<C: Node> {
+pub struct Orth<C: Node> {
     len: usize,
     height: usize,
     width: usize,

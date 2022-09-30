@@ -1,20 +1,21 @@
+pub mod path;
 use image::Rgba;
 
 #[derive(Clone, Debug)]
-pub(crate) struct Basic {
+pub struct Basic {
     size: Size,
     colors: Colors,
     text: Text,
 }
 
 impl Basic {
-    pub(crate) fn size(&self) -> &Size {
+    pub fn size(&self) -> &Size {
         &self.size
     }
-    pub(crate) fn colors(&self) -> &Colors {
+    pub fn colors(&self) -> &Colors {
         &self.colors
     }
-    pub(crate) fn text(&self) -> &Text {
+    pub fn text(&self) -> &Text {
         &self.text
     }
 }
@@ -29,23 +30,23 @@ impl Default for Basic {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Size {
+pub struct Size {
     block_height: u32,
     block_width: u32,
     padding: u32,
     dash_width: u32,
 }
 impl Size {
-    pub(crate) fn block_width(&self) -> u32 {
+    pub fn block_width(&self) -> u32 {
         self.block_width
     }
-    pub(crate) fn block_height(&self) -> u32 {
+    pub fn block_height(&self) -> u32 {
         self.block_height
     }
-    pub(crate) fn padding(&self) -> u32 {
+    pub fn padding(&self) -> u32 {
         self.padding
     }
-    pub(crate) fn dash_width(&self) -> u32 {
+    pub fn dash_width(&self) -> u32 {
         self.dash_width
     }
 }
@@ -61,7 +62,7 @@ impl Default for Size {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Colors {
+pub struct Colors {
     maze_bg: Option<Rgba<u8>>,
     cell_bg: Rgba<u8>,
     edges: Rgba<u8>,
@@ -70,22 +71,22 @@ pub(crate) struct Colors {
     text: Rgba<u8>,
 }
 impl Colors {
-    pub(crate) fn maze_bg(&self) -> Rgba<u8> {
+    pub fn maze_bg(&self) -> Rgba<u8> {
         self.maze_bg.unwrap_or(Rgba([255, 255, 255, 255]))
     }
-    pub(crate) fn cell_bg(&self) -> &Rgba<u8> {
+    pub fn cell_bg(&self) -> &Rgba<u8> {
         &self.cell_bg
     }
-    pub(crate) fn edges(&self) -> &Rgba<u8> {
+    pub fn edges(&self) -> &Rgba<u8> {
         &self.edges
     }
-    pub(crate) fn dashed_edges(&self) -> &Rgba<u8> {
+    pub fn dashed_edges(&self) -> &Rgba<u8> {
         &self.dashed_edges
     }
-    pub(crate) fn outer_edges(&self) -> &Rgba<u8> {
+    pub fn outer_edges(&self) -> &Rgba<u8> {
         &self.outer_edges
     }
-    pub(crate) fn text(&self) -> &Rgba<u8> {
+    pub fn text(&self) -> &Rgba<u8> {
         &self.text
     }
 }
@@ -104,7 +105,7 @@ impl Default for Colors {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Text {
+pub struct Text {
     show: bool,
     center: bool,
     width: f32,
@@ -112,22 +113,22 @@ pub(crate) struct Text {
     padding: freehand::Pt<i32>,
 }
 impl Text {
-    pub(crate) fn show(&self) -> bool {
+    pub fn show(&self) -> bool {
         self.show
     }
-    pub(crate) fn center(&self) -> bool {
+    pub fn center(&self) -> bool {
         self.center
     }
-    pub(crate) fn width(&self) -> f32 {
+    pub fn width(&self) -> f32 {
         self.width
     }
-    pub(crate) fn height(&self) -> f32 {
+    pub fn height(&self) -> f32 {
         self.height
     }
-    pub(crate) fn padding(&self) -> freehand::Pt<i32> {
+    pub fn padding(&self) -> freehand::Pt<i32> {
         self.padding
     }
-    pub(crate) fn scale(&self) -> rusttype::Scale {
+    pub fn scale(&self) -> rusttype::Scale {
         rusttype::Scale {
             x: self.width,
             y: self.height,
@@ -143,5 +144,32 @@ impl Default for Text {
             height: 15.2f32,
             padding: freehand::Pt::new(0, 0),
         }
+    }
+}
+
+// impl<'b> From<Basic> for std::borrow::Cow<'b, Basic> {
+//     fn from(basic: Basic) -> Self {
+//         std::borrow::Cow::Owned(basic)
+//     }
+// }
+
+pub enum Color {
+    Rgba(image::Rgba<u8>),
+    Intensity(),
+    BlendSolid(),
+    BlendAlpha(),
+}
+mod color {
+    pub trait Color {}
+    pub struct Solid {}
+    pub struct Intensity {}
+    pub struct BlendSolid {
+        bg: image::Rgba<u8>,
+        blend: image::Rgba<u8>,
+        opacity: f32,
+    }
+    pub struct BlendAlpha {
+        blend: image::Rgba<u8>,
+        opacity: f32,
     }
 }

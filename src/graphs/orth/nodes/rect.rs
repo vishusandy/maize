@@ -5,7 +5,7 @@ use freehand::*;
 use image::{Rgba, RgbaImage};
 
 #[derive(Clone, Debug)]
-pub(crate) struct RectBlock {
+pub struct RectBlock {
     nw: Pt<u32>,
     ne: Pt<u32>,
     se: Pt<u32>,
@@ -78,7 +78,7 @@ impl RectBlock {
 impl Block for RectBlock {}
 
 #[derive(Clone, Debug)]
-pub(crate) struct RectCell {
+pub struct RectCell {
     id: usize,
     row: u32,
     col: u32,
@@ -209,6 +209,19 @@ impl crate::render::RenderBlock for RectCell {
 }
 
 impl Orth<RectCell> {
+    /// Use default rendering options to render an image
+    pub fn render(&self) -> RgbaImage {
+        self.build_render().finish().render()
+    }
+
+    pub fn build_render<'g>(&'g self) -> crate::render::state::BuilderGraph<'g, Self> {
+        crate::render::state::GraphStateBuilder::graph(self)
+    }
+
+    pub fn build_render_owned<'g>(self) -> crate::render::state::BuilderGraph<'g, Self> {
+        crate::render::state::GraphStateBuilder::owned_graph(self)
+    }
+
     fn above(id: usize, width: usize) -> Option<usize> {
         if id < width {
             None
@@ -325,8 +338,7 @@ mod tests {
     fn rect_image() -> Result<(), image::ImageError> {
         crate::logger(log::LevelFilter::Trace);
         use crate::graphs::Graph;
-        use crate::render::{RenderGraph, RenderState};
-        let mut grid = Orth::new(4, 4);
+        let mut grid: Orth<RectCell> = Orth::new(4, 4);
 
         grid.link(0, 1).unwrap();
         grid.link(1, 5).unwrap();
@@ -335,9 +347,6 @@ mod tests {
         grid.link(10, 14).unwrap();
         grid.link(14, 15).unwrap();
 
-        let opts = crate::render::opts::Basic::default();
-        let renderer = grid.render(std::borrow::Cow::Borrowed(&opts));
-
-        renderer.render().save("images/tests/rect_grid.png")
+        grid.render().save("images/tests/rect_grid.png")
     }
 }

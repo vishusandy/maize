@@ -21,7 +21,7 @@ pub trait Node {
     fn unlink(&mut self, cell: usize) -> Result<(), crate::error::Error>;
 }
 
-pub(crate) trait Graph {
+pub trait Graph {
     type Node: Node;
     fn len(&self) -> usize;
     fn cell(&self, id: usize) -> &Self::Node;

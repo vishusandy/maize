@@ -9,6 +9,10 @@ mod graphs;
 mod render;
 pub use crate::drawing::Pt;
 
+pub use crate::graphs::orth::nodes::rect::RectCell;
+pub use crate::graphs::orth::Orth;
+pub use crate::render::opts;
+
 const DEFAULT_NEIGHBORS: usize = 6;
 
 #[cfg(test)]

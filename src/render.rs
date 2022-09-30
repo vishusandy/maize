@@ -1,4 +1,4 @@
-pub(crate) mod opts;
+pub mod opts;
 pub(crate) mod path;
 pub(crate) mod state;
 use freehand::Pt;
@@ -28,25 +28,7 @@ pub(crate) trait RenderBlock: Node {
     fn text_pos(&self, block: &Self::Block, center: bool, padding: Pt<i32>) -> Pt<u32>;
     // draw functions go here
 }
-pub(crate) trait RenderGraph: Graph {
-    fn render<'b, 'c, 'e, 'g, 'o>(
-        &'g self,
-        opts: std::borrow::Cow<'o, crate::render::opts::Basic>,
-    ) -> crate::render::state::GraphState<'b, 'c, 'e, 'g, 'o, Self>
-    where
-        Self: Clone + std::fmt::Debug,
-        <Self::Node as Node>::Block: Clone + std::fmt::Debug,
-    {
-        crate::render::state::GraphState::new(
-            self,
-            self.blocks(
-                opts.size().block_height(),
-                opts.size().block_width(),
-                opts.size().padding(),
-            ),
-            opts,
-        )
-    }
+pub trait RenderGraph: Graph {
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32);
     fn blocks(
         &self,
@@ -87,16 +69,8 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
     where
         P: AsRef<std::path::Path>,
     {
-        self.render().save(path)
+        self.render_image().save(path)
     }
-    fn new(
-        graph: &'g Self::Graph,
-        blocks: Vec<<<Self::Graph as Graph>::Node as Node>::Block>,
-        opts: std::borrow::Cow<'o, opts::Basic>,
-    ) -> Self
-    where
-        Self::Graph: RenderGraph + Clone + std::fmt::Debug,
-        <<Self::Graph as Graph>::Node as Node>::Block: Clone + std::fmt::Debug;
     fn borrowed(
         graph: &'g Self::Graph,
         blocks: &'b Vec<<<Self::Graph as Graph>::Node as Node>::Block>,
@@ -104,7 +78,7 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
         edges: &'e crate::edges::Undirected<Rgba<u8>>,
         opts: &'o opts::Basic,
     ) -> Self;
-    fn render(&self) -> RgbaImage;
+    fn render_image(&self) -> RgbaImage;
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, img: &mut RgbaImage);
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage);
     fn edges(&self, img: &mut RgbaImage);

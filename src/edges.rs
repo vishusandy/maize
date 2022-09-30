@@ -8,10 +8,12 @@ pub(crate) struct UndirEdge<V> {
     b: Conn,
     v: V,
 }
+
 impl<V> UndirEdge<V> {
     fn new(a: Conn, b: Conn, v: V) -> Self {
         Self { a, b, v }
     }
+
     fn map<G: Graph, U>(&self, grid: &G, value: U) -> UndirEdge<U> {
         UndirEdge {
             a: self.a.clone(),
@@ -19,6 +21,7 @@ impl<V> UndirEdge<V> {
             v: value,
         }
     }
+
     fn map_with<G: Graph, F: Fn(&G, &Conn) -> U, U>(&self, grid: &G, f: F) -> UndirEdge<U> {
         UndirEdge {
             a: self.a.clone(),
@@ -26,18 +29,23 @@ impl<V> UndirEdge<V> {
             v: f(grid, &self.a),
         }
     }
+
     pub(crate) fn a(&self) -> &Conn {
         &self.a
     }
+
     pub(crate) fn b(&self) -> &Conn {
         &self.b
     }
+
     pub(crate) fn cells(&self) -> (&Conn, &Conn) {
         (&self.a, &self.b)
     }
+
     pub(crate) fn value(&self) -> &V {
         &self.v
     }
+
     pub(crate) fn has_id(&self, id: usize) -> bool {
         (self.a.id == id) | (self.b.id == id)
     }
@@ -48,6 +56,7 @@ pub(crate) struct Conn {
     id: usize,
     side: usize,
 }
+
 impl Conn {
     fn new(id: usize, side: usize) -> Self {
         Self { id, side }
@@ -59,6 +68,7 @@ impl Conn {
         self.side
     }
 }
+
 impl From<(usize, usize)> for Conn {
     fn from(a: (usize, usize)) -> Self {
         Self { id: a.0, side: a.1 }
@@ -66,30 +76,19 @@ impl From<(usize, usize)> for Conn {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Undirected<V> {
+pub struct Undirected<V> {
     cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>>,
     edges: Vec<UndirEdge<V>>, // edge id is the index
     outside: Vec<(Conn, V)>,
 }
+
 impl<V> Undirected<V> {
-    pub(crate) fn iter(&self) -> std::slice::Iter<UndirEdge<V>> {
-        self.edges.iter()
-    }
-    pub(crate) fn iter_outer(&self) -> std::slice::Iter<(Conn, V)> {
-        self.outside.iter()
-    }
     pub(crate) fn new<G: Graph>(grid: &G, default: V) -> Self
     where
         V: Copy,
     {
         let f = |_: &G, _: usize| default;
         Self::new_with(grid, f, f)
-    }
-    pub(crate) fn edges(&self) -> &Vec<UndirEdge<V>> {
-        &self.edges
-    }
-    pub(crate) fn outer(&self) -> &Vec<(Conn, V)> {
-        &self.outside
     }
     pub(crate) fn new_with<G: Graph, F: Fn(&G, usize) -> V>(grid: &G, inner: F, outer: F) -> Self {
         let mut cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>> = (0..grid.len())
@@ -127,6 +126,22 @@ impl<V> Undirected<V> {
         }
     }
 
+    pub(crate) fn iter(&self) -> std::slice::Iter<UndirEdge<V>> {
+        self.edges.iter()
+    }
+
+    pub(crate) fn iter_outer(&self) -> std::slice::Iter<(Conn, V)> {
+        self.outside.iter()
+    }
+
+    pub(crate) fn edges(&self) -> &Vec<UndirEdge<V>> {
+        &self.edges
+    }
+
+    pub(crate) fn outer(&self) -> &Vec<(Conn, V)> {
+        &self.outside
+    }
+
     pub(crate) fn map<G: Graph, U>(&self, grid: &G, inner: &U, outer: &U) -> Undirected<U>
     where
         U: Clone,
@@ -147,6 +162,7 @@ impl<V> Undirected<V> {
             },
         }
     }
+
     /// The map method makes a new `Undirected` edge list with a different stored value.  This avoids the overhead of mapping each cell edges to borders.
     pub(crate) fn map_with<G: Graph, F: Fn(&G, &Conn) -> U, U>(
         &self,
