@@ -132,20 +132,34 @@ where
         );
     }
 
-    fn edges(&self, img: &mut RgbaImage) {
-        for edge in self.edges.edges() {
+    fn edges(&self, image: &mut RgbaImage) {
+        for edge in self.edges.iter() {
             let id = edge.a().id();
-            let side = edge.a().side();
-            let color = edge.value();
             self.graph.edge(
                 &self.graph.cell(id),
                 &self.blocks[id],
-                side,
+                edge.a().side(),
                 self.opts.size().dash_width(),
-                color,
+                edge.value(),
                 self.opts.colors().dashed_edges(),
-                img,
+                image,
             );
         }
+        #[cfg(test)]
+        log::debug!("outer edges");
+        self.edges.iter_outer().for_each(|(conn, col)| {
+            let id = conn.id();
+            #[cfg(test)]
+            log::debug!("id={} side={}", id, conn.side());
+            self.graph.edge(
+                &self.graph.cell(id),
+                &self.blocks[id],
+                conn.side(),
+                self.opts.size().dash_width(),
+                self.opts.colors().outer_edges(),
+                self.opts.colors().dashed_edges(),
+                image,
+            );
+        });
     }
 }

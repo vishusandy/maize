@@ -75,6 +75,9 @@ impl<V> Undirected<V> {
     pub(crate) fn iter(&self) -> std::slice::Iter<UndirEdge<V>> {
         self.edges.iter()
     }
+    pub(crate) fn iter_outer(&self) -> std::slice::Iter<(Conn, V)> {
+        self.outside.iter()
+    }
     pub(crate) fn new<G: Graph>(grid: &G, default: V) -> Self
     where
         V: Copy,
@@ -85,6 +88,9 @@ impl<V> Undirected<V> {
     pub(crate) fn edges(&self) -> &Vec<UndirEdge<V>> {
         &self.edges
     }
+    pub(crate) fn outer(&self) -> &Vec<(Conn, V)> {
+        &self.outside
+    }
     pub(crate) fn new_with<G: Graph, F: Fn(&G, usize) -> V>(grid: &G, inner: F, outer: F) -> Self {
         let mut cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>> = (0..grid.len())
             .map(|i| (0..grid.cell(i).max_neighbors()).map(|_| None).collect())
@@ -92,24 +98,25 @@ impl<V> Undirected<V> {
         let mut edges: Vec<UndirEdge<V>> = Vec::with_capacity(grid.len() * G::Node::N); // allocate enough space to accomodate all edges - even in a wrap-around style grid (e.g., a cyclinder)
         let mut outside: Vec<(Conn, V)> = Vec::with_capacity(grid.len()); // default capacity could be improved here with a Graph method
         for cell in grid.cells() {
-            // assert_eq!(cell.id(), cells.len());
-            for (i, id) in cell.neighbors().enumerate() {
-                if let Some(n) = cell.neighbor(i) {
-                    let neighbor = grid.cell(n);
+            for (i, neighbor) in cell.all_neighbors().iter().enumerate() {
+                if let Some(n) = neighbor {
+                    let neighbor = grid.cell(*n);
                     if let Some(nside) = neighbor.neighbor_id(cell.id()) {
-                        if let Some(e) = cells[n][nside] {
+                        if let Some(e) = cells[*n][nside] {
                             cells[cell.id()][i] = Some(e); // an existing neighbor has listed this edge already - use the corresponding edge
                             continue;
                         }
                         // no existing edge found - create a new one
                         cells[cell.id()][i] = Some(edges.len());
                         let a = Conn::new(cell.id(), i);
-                        let b = Conn::new(n, nside);
+                        let b = Conn::new(*n, nside);
                         let edge: UndirEdge<V> = UndirEdge::new(a, b, inner(grid, i));
                         edges.push(edge);
                         continue;
                     }
                 }
+                #[cfg(test)]
+                log::debug!("Adding outer edge: id={} n={}", cell.id(), i);
                 outside.push((Conn::new(cell.id(), i), outer(grid, i))); // the current edge is an outer edge - add it to the list
             }
         }
