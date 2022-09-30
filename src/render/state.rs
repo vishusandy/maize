@@ -58,13 +58,11 @@ where
                 graph.len(),
                 &opts.colors().cell_bg(),
             )),
-            edges: Cow::Owned(crate::edges::Undirected::new(
-                graph,
-                opts.colors().outer_edges().clone(),
-            )),
+            edges: Cow::Owned(crate::edges::Undirected::new(graph, *opts.colors().edges())),
             opts,
         }
     }
+
     fn borrowed(
         graph: &'g Self::Graph,
         blocks: &'b Vec<<<Self::Graph as Graph>::Node as Node>::Block>,
@@ -80,13 +78,14 @@ where
             opts: Cow::Borrowed(opts),
         }
     }
+
     fn render(&self) -> RgbaImage {
         let size = self.opts.size();
         let (x, y) = self
             .graph
             .size(size.block_height(), size.block_width(), size.padding());
         #[allow(unused_mut)]
-        let mut img = RgbaImage::new(x, y);
+        let mut img = RgbaImage::from_pixel(x, y, self.opts.colors().maze_bg());
         for cell in self.graph.cells() {
             self.fill(cell, &mut img);
             if self.opts.text().show() {
@@ -94,25 +93,59 @@ where
                 self.text(cell, &id, &mut img);
             }
         }
+        self.edges(&mut img);
         img
     }
+
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, img: &mut RgbaImage) {
         if let Some(color) = &self.node_state[cell.id()].color {
             self.graph.fill(cell, &self.blocks[cell.id()], color, img)
         }
     }
-    fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage) {
-        let (x, y) = self
-            .graph
-            .text_pos(cell, &self.blocks[cell.id()], self.opts.text().center());
+
+    fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, image: &mut RgbaImage) {
+        use imageproc::drawing::{draw_text_mut, text_size};
+        let padding = if self.opts.text().center() {
+            let size = freehand::Pt::from(text_size(
+                self.opts.text().scale(),
+                &crate::render::DEJAVU,
+                text,
+            ));
+            self.opts.text().padding() - (size.div(2))
+        } else {
+            self.opts.text().padding()
+        };
+        let pt = self.graph.text_pos(
+            cell,
+            &self.blocks[cell.id()],
+            self.opts.text().center(),
+            padding,
+        );
+        draw_text_mut(
+            image,
+            *self.opts.colors().text(),
+            pt.x() as i32,
+            pt.y() as i32,
+            self.opts.text().scale(),
+            &crate::render::DEJAVU,
+            text,
+        );
     }
+
     fn edges(&self, img: &mut RgbaImage) {
         for edge in self.edges.edges() {
             let id = edge.a().id();
             let side = edge.a().side();
             let color = edge.value();
-            self.graph
-                .edge(&self.graph.cell(id), &self.blocks[id], side, color, img);
+            self.graph.edge(
+                &self.graph.cell(id),
+                &self.blocks[id],
+                side,
+                self.opts.size().dash_width(),
+                color,
+                self.opts.colors().dashed_edges(),
+                img,
+            );
         }
     }
 }

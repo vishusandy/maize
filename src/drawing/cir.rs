@@ -1,11 +1,5 @@
-// use image::{Rgba, RgbaImage};
-// use imageproc;
-// use crate::drawing::octs;
-
-// use super::cir::MPCircle;
-
 #[derive(Clone, Debug)]
-pub(crate) struct TorusSlice {
+pub(crate) struct AnnulusSlice {
     center: (f64, f64),
     /// Theta for the counter-clockwise point (angle in radians)
     ccw: f64,
@@ -16,7 +10,7 @@ pub(crate) struct TorusSlice {
     /// Outer radius
     outer: f64,
 }
-impl TorusSlice {
+impl AnnulusSlice {
     pub(crate) fn new(center: (f64, f64), ccw: f64, cw: f64, inner: f64, outer: f64) -> Self {
         Self {
             center,
@@ -90,7 +84,7 @@ mod tests {
     fn torus() -> Result<(), image::ImageError> {
         let mut image =
             image::RgbaImage::from_vec(400, 400, Vec::from([255; 400 * 400 * 4])).unwrap();
-        let torus = TorusSlice::new((200.0, 200.0), PI * 0.1, PI * 1.8, 50.0, 80.0);
+        let torus = AnnulusSlice::new((200.0, 200.0), PI * 0.0, PI * 0.25, 50.0, 80.0);
         let (x, y) = torus.a();
         image.put_pixel(
             x.round() as u32,
