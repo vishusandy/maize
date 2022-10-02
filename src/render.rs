@@ -1,5 +1,4 @@
 pub mod opts;
-pub(crate) mod path;
 pub(crate) mod state;
 use freehand::Pt;
 use rusttype::Font;
@@ -12,21 +11,48 @@ pub(crate) const DEJAVU_BYTES: &[u8] = include_bytes!("../assets/DejaVuSansMono.
 lazy_static::lazy_static! {
     pub(crate) static ref DEJAVU: Font<'static> = Font::try_from_bytes(DEJAVU_BYTES).unwrap();
 }
+/// Optional trait for nodes that can be rendered with only a block - no additional information from the graph required
 // RenderBlock does NOT get implemented for Circular graph blocks
 pub(crate) trait RenderBlock: Node {
     fn block(&self, height: u32, width: u32, padding: u32) -> Self::Block;
     fn fill(&self, block: &Self::Block, color: &Rgba<u8>, img: &mut RgbaImage);
+    fn blend_fill(
+        &self,
+        block: &Self::Block,
+        i: usize,
+        max: usize,
+        blend: &crate::render::opts::blend::Blend,
+        image: &mut RgbaImage,
+    );
+    /// Draw a solid edge for edges with no link
     fn edge_unlinked(&self, block: &Self::Block, n: usize, color: &Rgba<u8>, img: &mut RgbaImage);
+    /// Draw a dashed edge for edges with a link
     fn edge_linked(
         &self,
         block: &Self::Block,
         n: usize,
-        width: u32,
+        dash_width: u32,
         color: &Rgba<u8>,
-        img: &mut RgbaImage,
+        image: &mut RgbaImage,
     );
     fn text_pos(&self, block: &Self::Block, center: bool, padding: Pt<i32>) -> Pt<u32>;
-    // draw functions go here
+    fn arrow(
+        &self,
+        block: &Self::Block,
+        from_n: usize,
+        to_n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    );
+    fn half_arrow(
+        &self,
+        block: &Self::Block,
+        n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    );
 }
 pub trait RenderGraph: Graph {
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32);
@@ -41,7 +67,16 @@ pub trait RenderGraph: Graph {
         cell: &Self::Node,
         block: &<Self::Node as Node>::Block,
         color: &Rgba<u8>,
-        img: &mut RgbaImage,
+        image: &mut RgbaImage,
+    );
+    fn blend_fill(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        i: usize,
+        max: usize,
+        blend: &crate::render::opts::blend::Blend,
+        image: &mut RgbaImage,
     );
     fn text_pos(
         &self,
@@ -58,7 +93,26 @@ pub trait RenderGraph: Graph {
         dash_width: u32,
         linked_color: &Rgba<u8>,
         unlinked_color: &Rgba<u8>,
-        img: &mut RgbaImage,
+        image: &mut RgbaImage,
+    );
+    fn arrow(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        from_n: usize,
+        to_n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    );
+    fn half_arrow(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
     );
 }
 
@@ -71,13 +125,6 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
     {
         self.render_image().save(path)
     }
-    fn borrowed(
-        graph: &'g Self::Graph,
-        blocks: &'b Vec<<<Self::Graph as Graph>::Node as Node>::Block>,
-        node_state: &'c Vec<crate::render::state::NodeState>,
-        edges: &'e crate::edges::Undirected<Rgba<u8>>,
-        opts: &'o opts::Basic,
-    ) -> Self;
     fn render_image(&self) -> RgbaImage;
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, img: &mut RgbaImage);
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage);

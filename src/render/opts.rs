@@ -1,5 +1,10 @@
-pub mod path;
+pub(crate) mod blend;
+mod path;
 use image::Rgba;
+pub(crate) use path::Arrow;
+pub(crate) use path::Path;
+
+// todo: add builders for Basic, Size, Colors, and Text
 
 #[derive(Clone, Debug)]
 pub struct Basic {
@@ -19,6 +24,7 @@ impl Basic {
         &self.text
     }
 }
+
 impl Default for Basic {
     fn default() -> Self {
         Self {
@@ -36,6 +42,7 @@ pub struct Size {
     padding: u32,
     dash_width: u32,
 }
+
 impl Size {
     pub fn block_width(&self) -> u32 {
         self.block_width
@@ -50,6 +57,7 @@ impl Size {
         self.dash_width
     }
 }
+
 impl Default for Size {
     fn default() -> Self {
         Self {
@@ -70,6 +78,7 @@ pub struct Colors {
     outer_edges: Rgba<u8>,
     text: Rgba<u8>,
 }
+
 impl Colors {
     pub fn maze_bg(&self) -> Rgba<u8> {
         self.maze_bg.unwrap_or(Rgba([255, 255, 255, 255]))
@@ -90,6 +99,7 @@ impl Colors {
         &self.text
     }
 }
+
 impl Default for Colors {
     fn default() -> Self {
         Self {
@@ -135,6 +145,7 @@ impl Text {
         }
     }
 }
+
 impl Default for Text {
     fn default() -> Self {
         Self {
@@ -144,32 +155,5 @@ impl Default for Text {
             height: 15.2f32,
             padding: freehand::Pt::new(0, 0),
         }
-    }
-}
-
-// impl<'b> From<Basic> for std::borrow::Cow<'b, Basic> {
-//     fn from(basic: Basic) -> Self {
-//         std::borrow::Cow::Owned(basic)
-//     }
-// }
-
-pub enum Color {
-    Rgba(image::Rgba<u8>),
-    Intensity(),
-    BlendSolid(),
-    BlendAlpha(),
-}
-mod color {
-    pub trait Color {}
-    pub struct Solid {}
-    pub struct Intensity {}
-    pub struct BlendSolid {
-        bg: image::Rgba<u8>,
-        blend: image::Rgba<u8>,
-        opacity: f32,
-    }
-    pub struct BlendAlpha {
-        blend: image::Rgba<u8>,
-        opacity: f32,
     }
 }

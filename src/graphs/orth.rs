@@ -99,6 +99,17 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
     ) {
         cell.fill(block, color, img);
     }
+    fn blend_fill(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        i: usize,
+        max: usize,
+        blend: &crate::render::opts::blend::Blend,
+        image: &mut RgbaImage,
+    ) {
+        cell.blend_fill(block, i, max, blend, image);
+    }
     fn text_pos(
         &self,
         cell: &Self::Node,
@@ -123,5 +134,28 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
         } else if dash_width != 0 {
             cell.edge_linked(block, n, dash_width, unlinked_color, image);
         }
+    }
+    fn arrow(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        from_n: usize,
+        to_n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    ) {
+        cell.arrow(block, from_n, to_n, style, color, image);
+    }
+    fn half_arrow(
+        &self,
+        cell: &Self::Node,
+        block: &<Self::Node as Node>::Block,
+        n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    ) {
+        cell.half_arrow(block, n, style, color, image);
     }
 }

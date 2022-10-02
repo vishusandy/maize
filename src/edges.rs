@@ -2,6 +2,30 @@ use crate::graphs::{Graph, Node};
 use crate::DEFAULT_NEIGHBORS;
 use smallvec::SmallVec;
 
+#[derive(Debug, Clone)]
+pub(crate) struct Conn {
+    id: usize,
+    side: usize,
+}
+
+impl Conn {
+    pub(crate) fn new(id: usize, side: usize) -> Self {
+        Self { id, side }
+    }
+    pub(crate) fn id(&self) -> usize {
+        self.id
+    }
+    pub(crate) fn side(&self) -> usize {
+        self.side
+    }
+}
+
+impl From<(usize, usize)> for Conn {
+    fn from(a: (usize, usize)) -> Self {
+        Self { id: a.0, side: a.1 }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct UndirEdge<V> {
     a: Conn,
@@ -51,30 +75,6 @@ impl<V> UndirEdge<V> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct Conn {
-    id: usize,
-    side: usize,
-}
-
-impl Conn {
-    fn new(id: usize, side: usize) -> Self {
-        Self { id, side }
-    }
-    pub(crate) fn id(&self) -> usize {
-        self.id
-    }
-    pub(crate) fn side(&self) -> usize {
-        self.side
-    }
-}
-
-impl From<(usize, usize)> for Conn {
-    fn from(a: (usize, usize)) -> Self {
-        Self { id: a.0, side: a.1 }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct Undirected<V> {
     cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>>,
@@ -114,8 +114,6 @@ impl<V> Undirected<V> {
                         continue;
                     }
                 }
-                #[cfg(test)]
-                log::debug!("Adding outer edge: id={} n={}", cell.id(), i);
                 outside.push((Conn::new(cell.id(), i), outer(grid, i))); // the current edge is an outer edge - add it to the list
             }
         }

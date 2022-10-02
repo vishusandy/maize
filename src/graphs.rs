@@ -13,6 +13,7 @@ pub trait Node {
         Self::N
     }
     fn neighbor(&self, n: usize) -> Option<usize>;
+    /// Returns the neighbor id of the shared edge between self and the specified cell
     fn neighbor_id(&self, cell: usize) -> Option<usize>;
     fn links(&self) -> Neighbors;
     fn linked_to(&self, id: usize) -> bool;

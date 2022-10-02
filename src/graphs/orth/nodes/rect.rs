@@ -1,6 +1,7 @@
 use crate::error::Error;
 use crate::graphs::orth::Orth;
 use crate::graphs::{Block, Neighbors, Node};
+use crate::render::opts::blend::Blend;
 use freehand::*;
 use image::{Rgba, RgbaImage};
 
@@ -23,6 +24,33 @@ impl RectBlock {
     }
     fn w(&self) -> (Pt<u32>, Pt<u32>) {
         (self.nw, self.sw)
+    }
+    fn center(&self) -> Pt<u32> {
+        Pt::new(
+            (self.nw.x() + self.se.x()) / 2,
+            (self.nw.y() + self.se.y()) / 2,
+        )
+    }
+    fn mid_n(&self) -> Pt<u32> {
+        Pt::new((self.nw.x() + self.ne.x()) / 2, self.nw.y())
+    }
+    fn mid_s(&self) -> Pt<u32> {
+        Pt::new((self.sw.x() + self.se.x()) / 2, self.sw.y())
+    }
+    fn mid_w(&self) -> Pt<u32> {
+        Pt::new(self.nw.x(), (self.nw.y() + self.sw.y()) / 2)
+    }
+    fn mid_e(&self) -> Pt<u32> {
+        Pt::new(self.ne.x(), (self.ne.y() + self.se.y()) / 2)
+    }
+    fn mid(&self, n: usize) -> Pt<u32> {
+        match n {
+            0 => self.mid_n(),
+            1 => self.mid_e(),
+            2 => self.mid_s(),
+            3 => self.mid_w(),
+            _ => panic!("Invalid edge {}", n),
+        }
     }
     fn draw_n(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
@@ -169,6 +197,26 @@ impl crate::render::RenderBlock for RectCell {
         let height = block.sw.y() - block.nw.y();
         rectangle_filled(image, block.nw, height, width, *color);
     }
+    fn blend_fill(
+        &self,
+        block: &Self::Block,
+        i: usize,
+        max: usize,
+        blend: &Blend,
+        image: &mut RgbaImage,
+    ) {
+        use crate::render::opts::blend::{intensity, intensity_color};
+        match blend {
+            Blend::None(color) => self.fill(block, &color, image),
+            Blend::RGBIntensity(color) => {
+                let int = intensity(i as f32, max as f32);
+                let col = intensity_color(color, int);
+                #[cfg(test)]
+                log::debug!("col={:?} i={} max={} int={:.01}", col, i, max, int);
+                self.fill(block, &col, image)
+            }
+        }
+    }
     fn edge_unlinked(
         &self,
         block: &Self::Block,
@@ -206,20 +254,66 @@ impl crate::render::RenderBlock for RectCell {
             .u32()
         }
     }
+    fn arrow(
+        &self,
+        block: &Self::Block,
+        from_n: usize,
+        to_n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    ) {
+        use crate::render::opts::Arrow;
+        match style {
+            Arrow::Straight => imageproc::drawing::draw_line_segment_mut(
+                image,
+                block.mid(from_n).f32().into(),
+                block.mid(to_n).f32().into(),
+                color,
+            ),
+            Arrow::StraightCenter => {
+                self.half_arrow(block, from_n, style, color, image);
+                self.half_arrow(block, to_n, style, color, image);
+            }
+            // todo: bezier curves
+            _ => todo!(),
+        }
+    }
+    fn half_arrow(
+        &self,
+        block: &Self::Block,
+        n: usize,
+        style: &crate::render::opts::Arrow,
+        color: Rgba<u8>,
+        image: &mut RgbaImage,
+    ) {
+        use crate::render::opts::Arrow;
+        match style {
+            Arrow::Straight | Arrow::StraightCenter => imageproc::drawing::draw_line_segment_mut(
+                image,
+                block.mid(n).f32().into(),
+                block.center().f32().into(),
+                color,
+            ),
+            // todo: bezier curves
+            _ => todo!(),
+        }
+    }
 }
 
+use crate::render::state::graph::{Builder, BuilderGraph};
 impl Orth<RectCell> {
     /// Use default rendering options to render an image
     pub fn render(&self) -> RgbaImage {
         self.build_render().finish().render()
     }
 
-    pub fn build_render<'g>(&'g self) -> crate::render::state::BuilderGraph<'g, Self> {
-        crate::render::state::GraphStateBuilder::graph(self)
+    pub fn build_render<'g>(&'g self) -> BuilderGraph<'g, Self> {
+        Builder::graph(self)
     }
 
-    pub fn build_render_owned<'g>(self) -> crate::render::state::BuilderGraph<'g, Self> {
-        crate::render::state::GraphStateBuilder::owned_graph(self)
+    pub fn build_render_owned<'g>(self) -> BuilderGraph<'g, Self> {
+        Builder::owned_graph(self)
     }
 
     fn above(id: usize, width: usize) -> Option<usize> {
