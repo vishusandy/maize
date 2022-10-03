@@ -34,8 +34,16 @@ impl Default for Path {
             // arrows: Some(Rgba([247, 64, 171, 255])),
             arrows: Some(Rgba([255, 200, 33, 255])),
             style: Arrow::default(),
-            // path_bg: Blend::None(Rgba([245, 218, 218, 255])),
-            path_bg: Blend::RGBIntensity(image::Rgb([true, false, true])),
+            // path_bg: Blend::RGBIntensity(image::Rgb([true, false, true])),
+            path_bg: Blend::HSLIntensity(
+                hsl::HSL {
+                    h: 195.0,
+                    s: 1.0,
+                    l: 0.5,
+                },
+                0.3,
+                0.7,
+            ),
         }
     }
 }

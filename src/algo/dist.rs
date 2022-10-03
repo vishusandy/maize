@@ -4,6 +4,7 @@ use crate::util::AddUpdate;
 #[derive(Clone, Debug)]
 pub struct Dist {
     dist: Vec<Option<usize>>,
+    start: usize,
     max: usize,
 }
 
@@ -11,6 +12,7 @@ impl Dist {
     pub(crate) fn blank<G: Graph>(graph: &G) -> Self {
         Self {
             dist: vec![None; graph.len()],
+            start: 0,
             max: 0,
         }
     }
@@ -30,7 +32,11 @@ impl Dist {
         self.max = max;
     }
 
-    /// Add a new value or update if the cell exists but has a greater value.
+    fn start(&mut self, start: usize) {
+        self.start = start;
+    }
+
+    /// Add a new value or update an existing value if it is smaller.
     fn add(&mut self, id: usize, dist: usize) -> AddUpdate {
         match self.dist(id) {
             Some(d) => {
@@ -54,6 +60,7 @@ pub(crate) fn distance_simple<G: Graph>(graph: &G, start: usize) -> Dist {
     let mut max = 0;
     let mut frontier: Vec<usize> = Vec::with_capacity(G::Node::N);
     frontier.push(start);
+    dist.start(start);
     dist.add(start, 0);
 
     while !frontier.is_empty() {

@@ -2,8 +2,10 @@ use super::RenderGraph;
 use crate::algo::dist::Dist;
 use crate::graphs::{Graph, Node};
 use crate::render::opts;
+use crate::render::state::graph;
 use crate::render::RenderState;
 use image::RgbaImage;
+use std::borrow::Cow;
 
 #[derive(Clone, Debug)]
 pub struct State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -90,5 +92,131 @@ where
 
     fn edges(&self, image: &mut RgbaImage) {
         self.state.edges(image)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Builder {}
+
+impl Builder {
+    pub fn render_state<'b, 'c, 'e, 'g, 'o, 'r, G>(
+        state: &'r graph::State<'b, 'c, 'e, 'g, 'o, G>,
+    ) -> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+    where
+        G: RenderGraph + Clone + std::fmt::Debug,
+        <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+    {
+        BuilderState {
+            state: Cow::Borrowed(state),
+        }
+    }
+
+    pub fn owned_render_state<'b, 'c, 'e, 'g, 'o, 'r, G>(
+        state: graph::State<'b, 'c, 'e, 'g, 'o, G>,
+    ) -> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+    where
+        G: RenderGraph + Clone + std::fmt::Debug,
+        <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+    {
+        BuilderState {
+            state: Cow::Owned(state),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'r, G> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn default_opts<'po>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Owned(opts::Dist::default()),
+        }
+    }
+
+    pub fn opts<'po>(self, opts: &'po opts::Dist) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Borrowed(opts),
+        }
+    }
+
+    pub fn owned_opts<'po>(self, opts: opts::Dist) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Owned(opts),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+    opts: Cow<'po, opts::Dist>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn simplified_dist<'pa>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        todo!()
+    }
+
+    pub fn dist<'pa>(self, path: &'pa Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        BuilderDist {
+            state: self.state,
+            dist: Cow::Borrowed(path),
+            opts: self.opts,
+        }
+    }
+
+    pub fn owned_dist<'pa>(self, path: Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        BuilderDist {
+            state: self.state,
+            dist: Cow::Owned(path),
+            opts: self.opts,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+    dist: Cow<'pa, Dist>,
+    opts: Cow<'po, opts::Dist>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn finish(self) -> State<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        State {
+            state: self.state,
+            dist: self.dist,
+            opts: self.opts,
+        }
     }
 }

@@ -94,22 +94,22 @@ impl RectBlock {
 
     fn draw_dashed_n(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
-        horizontal_dashed_line_blend(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
+        horizontal_dashed_line_alpha(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
     }
 
     fn draw_dashed_s(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.s();
-        horizontal_dashed_line_blend(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
+        horizontal_dashed_line_alpha(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
     }
 
     fn draw_dashed_w(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.w();
-        vertical_dashed_line_blend(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
+        vertical_dashed_line_alpha(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
     }
 
     fn draw_dashed_e(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.e();
-        vertical_dashed_line_blend(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
+        vertical_dashed_line_alpha(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
     }
 
     fn draw_dashed_side(
@@ -231,15 +231,22 @@ impl crate::render::RenderBlock for RectCell {
         blend: &Blend,
         image: &mut RgbaImage,
     ) {
-        use crate::render::opts::blend::{intensity, intensity_color};
+        use crate::render::opts::blend::{
+            calc_hsl_intensity, hsl_intensity, intensity, rgb_intensity,
+        };
         match blend {
             Blend::None(color) => self.fill(block, &color, image),
             Blend::RGBIntensity(color) => {
                 let int = intensity(i as f32, max as f32);
-                let col = intensity_color(color, int);
+                let col = rgb_intensity(color, int);
+                self.fill(block, &col, image);
+            }
+            Blend::HSLIntensity(color, min_l, max_l) => {
+                let int = calc_hsl_intensity(i as f64, max as f64, *min_l, *max_l);
                 #[cfg(test)]
-                log::debug!("col={:?} i={} max={} int={:.01}", col, i, max, int);
-                self.fill(block, &col, image)
+                log::debug!("i={} max={} int={:.2}", i, max, int);
+                let col = hsl_intensity(color, int);
+                self.fill(block, &col, image);
             }
         }
     }

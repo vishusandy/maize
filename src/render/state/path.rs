@@ -1,46 +1,11 @@
 use super::RenderGraph;
+use crate::algo::path;
 use crate::graphs::{Graph, Node};
 use crate::render::opts;
+use crate::render::state::graph;
 use crate::render::RenderState;
 use image::{Rgba, RgbaImage};
-
-#[derive(Clone, Debug)]
-pub struct Path {
-    /// Ordered listing of visited cell ids
-    path: Vec<usize>,
-    /// Reverse lookup to find what step number a given cell id has
-    cells: Vec<Option<usize>>,
-    /// The path length to use when calculating intentsity.
-    /// A None value uses the path length while a Some() value instead uses a specified length.
-    max: Option<usize>,
-}
-impl Path {
-    pub fn new<G: Graph>(graph: &G) -> Self {
-        Self {
-            path: Vec::with_capacity(graph.len() / G::Node::N),
-            cells: vec![None; graph.len()],
-            max: None,
-        }
-    }
-    pub fn add(&mut self, id: usize) -> Result<(), ()> {
-        if self.cells[id].is_none() {
-            self.cells[id] = Some(self.path.len());
-            self.path.push(id);
-            Ok(())
-        } else {
-            Err(())
-        }
-    }
-    pub fn step_num(&self, cell_id: usize) -> Option<usize> {
-        self.cells[cell_id]
-    }
-    pub fn step(&self, step: usize) -> usize {
-        self.path[step]
-    }
-    pub fn set_max(&mut self, max: Option<usize>) {
-        self.max = max;
-    }
-}
+use std::borrow::Cow;
 
 #[derive(Clone, Debug)]
 pub struct State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -48,8 +13,8 @@ where
     G: RenderGraph + Clone + std::fmt::Debug,
     <G::Node as Node>::Block: Clone + std::fmt::Debug,
 {
-    state: std::borrow::Cow<'r, crate::render::state::graph::State<'b, 'c, 'e, 'g, 'o, G>>,
-    path: std::borrow::Cow<'p, Path>,
+    state: std::borrow::Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+    path: std::borrow::Cow<'p, path::Path>,
     opts: std::borrow::Cow<'po, opts::Path>,
 }
 
@@ -154,6 +119,138 @@ where
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct Builder {}
+
+impl Builder {
+    pub fn render_state<'b, 'c, 'e, 'g, 'o, 'r, G>(
+        state: &'r graph::State<'b, 'c, 'e, 'g, 'o, G>,
+    ) -> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+    where
+        G: RenderGraph + Clone + std::fmt::Debug,
+        <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+    {
+        BuilderState {
+            state: Cow::Borrowed(state),
+        }
+    }
+
+    pub fn owned_render_state<'b, 'c, 'e, 'g, 'o, 'r, G>(
+        state: graph::State<'b, 'c, 'e, 'g, 'o, G>,
+    ) -> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+    where
+        G: RenderGraph + Clone + std::fmt::Debug,
+        <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+    {
+        BuilderState {
+            state: Cow::Owned(state),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'r, G> BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn default_opts<'po>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Owned(opts::Path::default()),
+        }
+    }
+
+    pub fn opts<'po>(self, opts: &'po opts::Path) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Borrowed(opts),
+        }
+    }
+
+    pub fn owned_opts<'po>(self, opts: opts::Path) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        BuilderOpts {
+            state: self.state,
+            opts: Cow::Owned(opts),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+    opts: Cow<'po, opts::Path>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn simplified_path<'pa>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+        todo!()
+    }
+
+    pub fn path<'pa>(
+        self,
+        path: &'pa path::Path,
+    ) -> BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        BuilderPath {
+            state: self.state,
+            path: Cow::Borrowed(path),
+            opts: self.opts,
+        }
+    }
+
+    pub fn owned_path<'pa>(
+        self,
+        path: path::Path,
+    ) -> BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        BuilderPath {
+            state: self.state,
+            path: Cow::Owned(path),
+            opts: self.opts,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
+    path: Cow<'pa, path::Path>,
+    opts: Cow<'po, opts::Path>,
+}
+
+impl<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>
+where
+    G: RenderGraph + Clone + std::fmt::Debug,
+    <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
+{
+    pub fn finish(self) -> State<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        State {
+            state: self.state,
+            path: self.path,
+            opts: self.opts,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -174,7 +271,7 @@ mod tests {
         grid.link(10, 9).unwrap();
         grid.link(9, 13).unwrap();
 
-        let mut path = Path::new(&grid);
+        let mut path = path::Path::new(&grid);
         path.add(0).unwrap();
         path.add(1).unwrap();
         path.add(5).unwrap();
