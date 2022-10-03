@@ -15,7 +15,9 @@ lazy_static::lazy_static! {
 // RenderBlock does NOT get implemented for Circular graph blocks
 pub(crate) trait RenderBlock: Node {
     fn block(&self, height: u32, width: u32, padding: u32) -> Self::Block;
+
     fn fill(&self, block: &Self::Block, color: &Rgba<u8>, img: &mut RgbaImage);
+
     fn blend_fill(
         &self,
         block: &Self::Block,
@@ -24,8 +26,10 @@ pub(crate) trait RenderBlock: Node {
         blend: &crate::render::opts::blend::Blend,
         image: &mut RgbaImage,
     );
+
     /// Draw a solid edge for edges with no link
     fn edge_unlinked(&self, block: &Self::Block, n: usize, color: &Rgba<u8>, img: &mut RgbaImage);
+
     /// Draw a dashed edge for edges with a link
     fn edge_linked(
         &self,
@@ -35,7 +39,9 @@ pub(crate) trait RenderBlock: Node {
         color: &Rgba<u8>,
         image: &mut RgbaImage,
     );
+
     fn text_pos(&self, block: &Self::Block, center: bool, padding: Pt<i32>) -> Pt<u32>;
+
     fn arrow(
         &self,
         block: &Self::Block,
@@ -45,6 +51,7 @@ pub(crate) trait RenderBlock: Node {
         color: Rgba<u8>,
         image: &mut RgbaImage,
     );
+
     fn half_arrow(
         &self,
         block: &Self::Block,
@@ -56,12 +63,14 @@ pub(crate) trait RenderBlock: Node {
 }
 pub trait RenderGraph: Graph {
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32);
+
     fn blocks(
         &self,
         block_height: u32,
         block_width: u32,
         padding: u32,
     ) -> Vec<<Self::Node as Node>::Block>;
+
     fn fill(
         &self,
         cell: &Self::Node,
@@ -69,6 +78,7 @@ pub trait RenderGraph: Graph {
         color: &Rgba<u8>,
         image: &mut RgbaImage,
     );
+
     fn blend_fill(
         &self,
         cell: &Self::Node,
@@ -78,6 +88,7 @@ pub trait RenderGraph: Graph {
         blend: &crate::render::opts::blend::Blend,
         image: &mut RgbaImage,
     );
+
     fn text_pos(
         &self,
         cell: &Self::Node,
@@ -85,16 +96,18 @@ pub trait RenderGraph: Graph {
         center: bool,
         padding: Pt<i32>,
     ) -> Pt<u32>;
+
     fn edge(
         &self,
         cell: &Self::Node,
         block: &<Self::Node as Node>::Block,
         n: usize,
         dash_width: u32,
-        linked_color: &Rgba<u8>,
         unlinked_color: &Rgba<u8>,
+        linked_color: &Rgba<u8>,
         image: &mut RgbaImage,
     );
+
     fn arrow(
         &self,
         cell: &Self::Node,
@@ -105,6 +118,7 @@ pub trait RenderGraph: Graph {
         color: Rgba<u8>,
         image: &mut RgbaImage,
     );
+
     fn half_arrow(
         &self,
         cell: &Self::Node,

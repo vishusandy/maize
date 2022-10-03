@@ -125,14 +125,14 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
         block: &<Self::Node as Node>::Block,
         n: usize,
         dash_width: u32,
-        linked_color: &Rgba<u8>,
         unlinked_color: &Rgba<u8>,
+        linked_color: &Rgba<u8>,
         image: &mut RgbaImage,
     ) {
         if !cell.linked_side(n) {
-            cell.edge_unlinked(block, n, linked_color, image);
+            cell.edge_unlinked(block, n, unlinked_color, image);
         } else if dash_width != 0 {
-            cell.edge_linked(block, n, dash_width, unlinked_color, image);
+            cell.edge_linked(block, n, dash_width, linked_color, image);
         }
     }
     fn arrow(
