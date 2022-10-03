@@ -11,6 +11,7 @@ pub struct Path {
     style: Arrow,
     path_bg: Blend,
 }
+
 impl Path {
     pub fn label_steps(&self) -> bool {
         self.label_steps

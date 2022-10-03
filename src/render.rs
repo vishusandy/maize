@@ -130,3 +130,19 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage);
     fn edges(&self, img: &mut RgbaImage);
 }
+
+pub(crate) fn new_image<G: RenderGraph>(
+    graph: &G,
+    size: &opts::Size,
+    colors: &opts::Colors,
+) -> RgbaImage {
+    let (x, y) = graph.size(size.block_height(), size.block_width(), size.padding());
+    let mut image = RgbaImage::from_pixel(x, y, colors.image_bg());
+    if let Some(bg) = colors.maze_bg() {
+        let pad = size.padding() as i32;
+        let pad2 = size.padding() + size.padding();
+        let rect = imageproc::rect::Rect::at(pad, pad).of_size(x - pad2, y - pad2);
+        imageproc::drawing::draw_filled_rect_mut(&mut image, rect, bg);
+    }
+    image
+}

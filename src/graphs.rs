@@ -1,4 +1,5 @@
 pub(crate) mod orth;
+pub(crate) mod weight;
 
 pub trait Block {}
 
@@ -18,8 +19,8 @@ pub trait Node {
     fn links(&self) -> Neighbors;
     fn linked_to(&self, id: usize) -> bool;
     fn linked_side(&self, n: usize) -> bool;
-    fn link(&mut self, cell: usize) -> Result<(), crate::error::Error>;
-    fn unlink(&mut self, cell: usize) -> Result<(), crate::error::Error>;
+    fn link(&mut self, cell: usize) -> Result<(), crate::Error>;
+    fn unlink(&mut self, cell: usize) -> Result<(), crate::Error>;
 }
 
 pub trait Graph {
@@ -28,8 +29,11 @@ pub trait Graph {
     fn cell(&self, id: usize) -> &Self::Node;
     fn cell_mut(&mut self, id: usize) -> &mut Self::Node;
     fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_>;
-    fn link(&mut self, a: usize, b: usize) -> Result<(), crate::error::Error>;
-    fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::error::Error>;
+    fn link(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
+    fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
+    fn distances_equal(&self, start: usize) -> crate::Dist {
+        todo!()
+    }
 }
 
 // https://adventures.michaelfbryan.com/posts/daily/iterators/

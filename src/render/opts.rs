@@ -1,5 +1,7 @@
 pub(crate) mod blend;
+mod dist;
 mod path;
+pub(crate) use dist::Dist;
 use image::Rgba;
 pub(crate) use path::Arrow;
 pub(crate) use path::Path;
@@ -71,17 +73,22 @@ impl Default for Size {
 
 #[derive(Clone, Debug)]
 pub struct Colors {
+    image_bg: Option<Rgba<u8>>,
     maze_bg: Option<Rgba<u8>>,
     cell_bg: Rgba<u8>,
     edges: Rgba<u8>,
+    /// Dashed edges will be blended using the color's alpha channel
     dashed_edges: Rgba<u8>,
     outer_edges: Rgba<u8>,
     text: Rgba<u8>,
 }
 
 impl Colors {
-    pub fn maze_bg(&self) -> Rgba<u8> {
-        self.maze_bg.unwrap_or(Rgba([255, 255, 255, 255]))
+    pub fn image_bg(&self) -> Rgba<u8> {
+        self.image_bg.unwrap_or(Rgba([255, 255, 255, 255]))
+    }
+    pub fn maze_bg(&self) -> Option<Rgba<u8>> {
+        self.maze_bg
     }
     pub fn cell_bg(&self) -> &Rgba<u8> {
         &self.cell_bg
@@ -103,11 +110,11 @@ impl Colors {
 impl Default for Colors {
     fn default() -> Self {
         Self {
-            // maze_bg: Rgba([180, 180, 180, 255]),
+            image_bg: None,
             maze_bg: None,
             cell_bg: Rgba([235, 235, 235, 255]),
-            edges: Rgba([160, 160, 160, 255]),
-            dashed_edges: Rgba([180, 180, 180, 255]),
+            edges: Rgba([80, 80, 80, 255]),
+            dashed_edges: Rgba([210, 210, 210, 128]),
             outer_edges: Rgba([0, 0, 0, 255]),
             text: Rgba([0, 0, 0, 255]),
         }

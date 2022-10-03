@@ -40,12 +40,9 @@ where
     type Graph = G;
 
     fn render_image(&self) -> RgbaImage {
-        let size = self.opts.size();
-        let (x, y) = self
-            .graph
-            .size(size.block_height(), size.block_width(), size.padding());
-        #[allow(unused_mut)]
-        let mut image = RgbaImage::from_pixel(x, y, self.opts.colors().maze_bg());
+        let mut image =
+            crate::render::new_image(&*self.graph, self.opts.size(), self.opts.colors());
+
         for cell in self.graph.cells() {
             self.fill(cell, &mut image);
             if self.opts.text().show() {
@@ -53,6 +50,7 @@ where
                 self.text(cell, &id, &mut image);
             }
         }
+
         self.edges(&mut image);
         image
     }
@@ -323,7 +321,11 @@ where
         }
     }
     pub fn default_edges<'e>(self) -> BuilderEdges<'b, 'c, 'e, 'g, 'o, G> {
-        let edges = Undirected::new(&*self.graph, *self.opts.colors().edges());
+        let edges = Undirected::new(
+            &*self.graph,
+            *self.opts.colors().edges(),
+            *self.opts.colors().outer_edges(),
+        );
         BuilderEdges {
             graph: self.graph,
             blocks: self.blocks,

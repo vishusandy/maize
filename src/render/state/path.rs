@@ -102,18 +102,19 @@ where
 {
     type Graph = G;
     fn render_image(&self) -> RgbaImage {
-        let size = self.state.opts.size();
-        let (x, y) = self
-            .state
-            .graph
-            .size(size.block_height(), size.block_width(), size.padding());
-        #[allow(unused_mut)]
-        let mut img = RgbaImage::from_pixel(x, y, self.state.opts.colors().maze_bg());
+        let mut image = crate::render::new_image(
+            &*self.state.graph,
+            self.state.opts.size(),
+            self.state.opts.colors(),
+        );
+
         for cell in self.state.graph.cells() {
-            self.fill(cell, &mut img);
+            self.fill(cell, &mut image);
+
             if let Some(arrow) = self.opts.arrows() {
-                self.arrows(cell, self.opts.style(), arrow, &mut img);
+                self.arrows(cell, self.opts.style(), arrow, &mut image);
             }
+
             if self.state.opts.text().show() {
                 if let Some(step) = self.path.step_num(cell.id()) {
                     let text = if self.opts.label_steps() {
@@ -121,12 +122,13 @@ where
                     } else {
                         cell.id().to_string()
                     };
-                    self.text(cell, &text, &mut img);
+                    self.text(cell, &text, &mut image);
                 }
             }
         }
-        self.edges(&mut img);
-        img
+
+        self.edges(&mut image);
+        image
     }
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, image: &mut RgbaImage) {
         if let Some(step) = self.path.step_num(cell.id()) {

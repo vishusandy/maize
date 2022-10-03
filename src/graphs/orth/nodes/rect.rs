@@ -1,7 +1,7 @@
-use crate::error::Error;
 use crate::graphs::orth::Orth;
 use crate::graphs::{Block, Neighbors, Node};
 use crate::render::opts::blend::Blend;
+use crate::Error;
 use freehand::*;
 use image::{Rgba, RgbaImage};
 
@@ -16,33 +16,42 @@ impl RectBlock {
     fn n(&self) -> (Pt<u32>, Pt<u32>) {
         (self.nw, self.ne)
     }
+
     fn e(&self) -> (Pt<u32>, Pt<u32>) {
         (self.ne, self.se)
     }
+
     fn s(&self) -> (Pt<u32>, Pt<u32>) {
         (self.sw, self.se)
     }
+
     fn w(&self) -> (Pt<u32>, Pt<u32>) {
         (self.nw, self.sw)
     }
+
     fn center(&self) -> Pt<u32> {
         Pt::new(
             (self.nw.x() + self.se.x()) / 2,
             (self.nw.y() + self.se.y()) / 2,
         )
     }
+
     fn mid_n(&self) -> Pt<u32> {
         Pt::new((self.nw.x() + self.ne.x()) / 2, self.nw.y())
     }
+
     fn mid_s(&self) -> Pt<u32> {
         Pt::new((self.sw.x() + self.se.x()) / 2, self.sw.y())
     }
+
     fn mid_w(&self) -> Pt<u32> {
         Pt::new(self.nw.x(), (self.nw.y() + self.sw.y()) / 2)
     }
+
     fn mid_e(&self) -> Pt<u32> {
         Pt::new(self.ne.x(), (self.ne.y() + self.se.y()) / 2)
     }
+
     fn mid(&self, n: usize) -> Pt<u32> {
         match n {
             0 => self.mid_n(),
@@ -52,22 +61,27 @@ impl RectBlock {
             _ => panic!("Invalid edge {}", n),
         }
     }
+
     fn draw_n(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
         horizontal_line(image, p.0.y() - 1, p.0.x(), p.1.x(), color);
     }
+
     fn draw_s(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.s();
         horizontal_line(image, p.0.y(), p.0.x(), p.1.x(), color);
     }
+
     fn draw_w(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.w();
         vertical_line(image, p.0.x(), p.0.y() - 1, p.1.y(), color);
     }
+
     fn draw_e(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.e();
         vertical_line(image, p.0.x(), p.0.y() - 1, p.1.y(), color);
     }
+
     fn draw_side(&self, n: usize, image: &mut RgbaImage, color: Rgba<u8>) {
         match n {
             0 => self.draw_n(image, color),
@@ -77,28 +91,40 @@ impl RectBlock {
             _ => {}
         }
     }
-    fn draw_dashed_n(&self, width: u32, image: &mut RgbaImage, color: Rgba<u8>) {
+
+    fn draw_dashed_n(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
-        horizontal_dashed_line(image, p.0.y() - 1, p.0.x(), p.1.x(), width, color);
+        horizontal_dashed_line_blend(image, p.0.y() - 1, p.0.x(), p.1.x(), width, opacity, color);
     }
-    fn draw_dashed_s(&self, width: u32, image: &mut RgbaImage, color: Rgba<u8>) {
+
+    fn draw_dashed_s(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.s();
-        horizontal_dashed_line(image, p.0.y(), p.0.x(), p.1.x(), width, color);
+        horizontal_dashed_line_blend(image, p.0.y(), p.0.x(), p.1.x(), width, opacity, color);
     }
-    fn draw_dashed_w(&self, width: u32, image: &mut RgbaImage, color: Rgba<u8>) {
+
+    fn draw_dashed_w(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.w();
-        vertical_dashed_line(image, p.0.x(), p.0.y() - 1, p.1.y(), width, color);
+        vertical_dashed_line_blend(image, p.0.x(), p.0.y() - 1, p.1.y(), width, opacity, color);
     }
-    fn draw_dashed_e(&self, width: u32, image: &mut RgbaImage, color: Rgba<u8>) {
+
+    fn draw_dashed_e(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.e();
-        vertical_dashed_line(image, p.0.x(), p.0.y() - 1, p.1.y(), width, color);
+        vertical_dashed_line_blend(image, p.0.x(), p.0.y() - 1, p.1.y(), width, opacity, color);
     }
-    fn draw_dashed_side(&self, n: usize, width: u32, image: &mut RgbaImage, color: Rgba<u8>) {
+
+    fn draw_dashed_side(
+        &self,
+        n: usize,
+        width: u32,
+        opacity: f32,
+        image: &mut RgbaImage,
+        color: Rgba<u8>,
+    ) {
         match n {
-            0 => self.draw_dashed_n(width, image, color),
-            1 => self.draw_dashed_e(width, image, color),
-            2 => self.draw_dashed_s(width, image, color),
-            3 => self.draw_dashed_w(width, image, color),
+            0 => self.draw_dashed_n(width, opacity, image, color),
+            1 => self.draw_dashed_e(width, opacity, image, color),
+            2 => self.draw_dashed_s(width, opacity, image, color),
+            3 => self.draw_dashed_w(width, opacity, image, color),
             _ => {}
         }
     }
@@ -193,8 +219,8 @@ impl crate::render::RenderBlock for RectCell {
         }
     }
     fn fill(&self, block: &Self::Block, color: &Rgba<u8>, image: &mut RgbaImage) {
-        let width = block.ne.x() - block.nw.x();
-        let height = block.sw.y() - block.nw.y();
+        let width = block.ne.x() - block.nw.x() + 1;
+        let height = block.sw.y() - block.nw.y() + 1;
         rectangle_filled(image, block.nw, height, width, *color);
     }
     fn blend_fill(
@@ -234,7 +260,7 @@ impl crate::render::RenderBlock for RectCell {
         color: &Rgba<u8>,
         image: &mut RgbaImage,
     ) {
-        block.draw_dashed_side(n, width, image, *color);
+        block.draw_dashed_side(n, width, color[3] as f32 / 255.0, image, *color);
     }
     fn text_pos(&self, block: &Self::Block, center: bool, padding: Pt<i32>) -> Pt<u32> {
         let width = (block.ne.x() - block.nw.x()) as i32;

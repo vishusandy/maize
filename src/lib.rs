@@ -2,13 +2,17 @@
 #![allow(unused_variables)]
 #![feature(const_fn_floating_point_arithmetic)]
 
+mod algo;
 mod drawing;
 mod edges;
 mod error;
 mod graphs;
 mod render;
+pub(crate) mod util;
 pub use crate::drawing::Pt;
 
+pub use crate::algo::dist::Dist;
+pub(crate) use crate::error::Error;
 pub use crate::graphs::orth::nodes::rect::RectCell;
 pub use crate::graphs::orth::Orth;
 pub use crate::render::opts;

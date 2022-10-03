@@ -1,4 +1,5 @@
 use crate::graphs::{Graph, Node};
+use crate::Error;
 use crate::DEFAULT_NEIGHBORS;
 use smallvec::SmallVec;
 
@@ -62,7 +63,7 @@ impl<V> UndirEdge<V> {
         &self.b
     }
 
-    pub(crate) fn cells(&self) -> (&Conn, &Conn) {
+    pub(crate) fn conns(&self) -> (&Conn, &Conn) {
         (&self.a, &self.b)
     }
 
@@ -83,14 +84,48 @@ pub struct Undirected<V> {
 }
 
 impl<V> Undirected<V> {
-    pub(crate) fn new<G: Graph>(grid: &G, default: V) -> Self
+    pub(crate) fn edge_value(&self, id: usize, n: usize) -> Result<&V, Error> {
+        if id >= self.cells.len() {
+            Err(Error::InvalidId(id, self.cells.len()))
+        } else if n >= self.cells[id].len() {
+            Err(Error::InvalidNeighbor(n, self.cells[id].len()))
+        } else {
+            match self.cells[id][n] {
+                Some(e) => Ok(&self.edges[e].v),
+                None => Err(Error::InvalidEdge(id, n)),
+            }
+        }
+    }
+
+    pub(crate) fn set_edge_value(&mut self, id: usize, n: usize, value: V) -> Result<(), Error> {
+        if id >= self.cells.len() {
+            Err(Error::InvalidId(id, self.cells.len()))
+        } else if n >= self.cells[id].len() {
+            Err(Error::InvalidNeighbor(n, self.cells[id].len()))
+        } else {
+            if let Some(e) = self.cells[id][n] {
+                self.edges[e].v = value;
+                Ok(())
+            } else {
+                Err(Error::InvalidEdge(id, n))
+            }
+        }
+    }
+
+    pub(crate) fn new<G: Graph>(grid: &G, inner: V, outer: V) -> Self
     where
         V: Copy,
     {
-        let f = |_: &G, _: usize| default;
-        Self::new_with(grid, f, f)
+        let i = |_: &G, _: usize, _: usize| inner;
+        let o = |_: &G, _: usize, _: usize| outer;
+        Self::new_with(grid, i, o)
     }
-    pub(crate) fn new_with<G: Graph, F: Fn(&G, usize) -> V>(grid: &G, inner: F, outer: F) -> Self {
+
+    pub(crate) fn new_with<G: Graph, I: Fn(&G, usize, usize) -> V, O: Fn(&G, usize, usize) -> V>(
+        grid: &G,
+        inner: I,
+        outer: O,
+    ) -> Self {
         let mut cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>> = (0..grid.len())
             .map(|i| (0..grid.cell(i).max_neighbors()).map(|_| None).collect())
             .collect();
@@ -109,12 +144,13 @@ impl<V> Undirected<V> {
                         cells[cell.id()][i] = Some(edges.len());
                         let a = Conn::new(cell.id(), i);
                         let b = Conn::new(*n, nside);
-                        let edge: UndirEdge<V> = UndirEdge::new(a, b, inner(grid, i));
+                        let edge: UndirEdge<V> = UndirEdge::new(a, b, inner(grid, cell.id(), i));
                         edges.push(edge);
                         continue;
                     }
                 }
-                outside.push((Conn::new(cell.id(), i), outer(grid, i))); // the current edge is an outer edge - add it to the list
+                outside.push((Conn::new(cell.id(), i), outer(grid, cell.id(), i)));
+                // the current edge is an outer edge - add it to the list
             }
         }
         Self {

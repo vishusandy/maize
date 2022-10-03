@@ -12,9 +12,9 @@ pub struct Orth<C: Node> {
     cells: Vec<C>,
 }
 impl<C: Node> Orth<C> {
-    fn check_id(&self, cell: usize) -> Result<(), crate::error::Error> {
+    fn check_id(&self, cell: usize) -> Result<(), crate::Error> {
         match cell >= self.len {
-            true => Err(crate::error::Error::InvalidCell(cell, self.len)),
+            true => Err(crate::Error::InvalidCell(cell, self.len)),
             false => Ok(()),
         }
     }
@@ -33,16 +33,16 @@ impl<C: Node> Graph for Orth<C> {
     fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_> {
         Box::new(Iter::new(self))
     }
-    fn link(&mut self, a: usize, b: usize) -> Result<(), crate::error::Error> {
+    fn link(&mut self, a: usize, b: usize) -> Result<(), crate::Error> {
         if a >= self.len {
-            return Err(crate::error::Error::InvalidCell(a, self.len));
+            return Err(crate::Error::InvalidCell(a, self.len));
         }
         if b >= self.len {
-            return Err(crate::error::Error::InvalidCell(b, self.len));
+            return Err(crate::Error::InvalidCell(b, self.len));
         }
         self.cells[a].link(b).and_then(|_| self.cells[b].link(a))
     }
-    fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::error::Error> {
+    fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::Error> {
         self.check_id(a)
             .and_then(|_| self.check_id(b))
             .and_then(|_| {
