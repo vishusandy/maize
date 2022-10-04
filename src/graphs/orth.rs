@@ -80,8 +80,8 @@ impl<'a, C: Node> Iterator for Iter<'a, C> {
 impl<C: RenderBlock> RenderGraph for Orth<C> {
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32) {
         (
-            (self.height) as u32 * (block_height + 1) + padding + padding,
             (self.width) as u32 * (block_width + 1) + padding + padding,
+            (self.height) as u32 * (block_height + 1) + padding + padding,
         )
     }
     fn blocks(&self, height: u32, width: u32, padding: u32) -> Vec<<Self::Node as Node>::Block> {
