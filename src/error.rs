@@ -22,4 +22,10 @@ pub enum Error {
     NoPathAvailable(usize),
     #[error("Invalid path add: path already contains node {0}")]
     InvalidPathAdd(usize),
+    #[error("Invalid HSL value: h must be in the range [0, 360) but found {0}")]
+    InvalidHslH(f64),
+    #[error("Invalid HSL value: s must be in the range [0, 1] but found {0}")]
+    InvalidHslS(f64),
+    #[error("Invalid HSL value: l must be in the range [0, 1] but found {0}")]
+    InvalidHslL(f64),
 }

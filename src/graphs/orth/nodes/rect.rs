@@ -1,4 +1,3 @@
-use crate::graphs::orth::Orth;
 use crate::graphs::{Block, Neighbors, Node};
 use crate::render::opts::blend::Blend;
 use crate::Error;
@@ -12,6 +11,7 @@ pub struct RectBlock {
     se: Pt<u32>,
     sw: Pt<u32>,
 }
+
 impl RectBlock {
     fn n(&self) -> (Pt<u32>, Pt<u32>) {
         (self.nw, self.ne)
@@ -133,51 +133,61 @@ impl Block for RectBlock {}
 
 #[derive(Clone, Debug)]
 pub struct RectCell {
-    id: usize,
-    row: u32,
-    col: u32,
-    n: [Option<usize>; 4], // neighbors
-    links: [Option<usize>; 4],
+    pub(super) id: usize,
+    pub(super) row: u32,
+    pub(super) col: u32,
+    pub(super) n: [Option<usize>; 4], // neighbors
+    pub(super) links: [Option<usize>; 4],
 }
 
 impl Node for RectCell {
     type Block = RectBlock;
     const N: usize = 4;
+
     fn id(&self) -> usize {
         self.id
     }
+
     fn all_neighbors(&self) -> &[Option<usize>] {
         &self.n
     }
+
     fn neighbors(&self) -> crate::graphs::Neighbors {
         crate::graphs::Neighbors::new(&self.n[..])
     }
+
     fn num_neighbors(&self) -> usize {
         self.n
             .iter()
             .fold(0usize, |acc, n| acc + n.is_some() as usize)
     }
+
     fn neighbor(&self, n: usize) -> Option<usize> {
         self.n[n]
     }
+
     fn neighbor_id(&self, cell: usize) -> Option<usize> {
         self.n.iter().position(|n| match n {
             Some(n) if *n == cell => true,
             _ => false,
         })
     }
+
     fn links(&self) -> Neighbors {
         Neighbors::new(&self.links)
     }
+
     fn linked_to(&self, id: usize) -> bool {
         match self.neighbor_id(id) {
             Some(n) => self.links[n].is_some(),
             None => false,
         }
     }
+
     fn linked_side(&self, n: usize) -> bool {
         self.links[n].is_some()
     }
+
     fn link(&mut self, cell: usize) -> Result<(), Error> {
         match self.neighbor_id(cell) {
             None => Err(Error::InvalidNeighbor(self.id, cell)),
@@ -191,6 +201,7 @@ impl Node for RectCell {
             }
         }
     }
+
     fn unlink(&mut self, cell: usize) -> Result<(), Error> {
         match self.neighbor_id(cell) {
             None => Err(Error::InvalidNeighbor(self.id, cell)),
@@ -218,11 +229,13 @@ impl crate::render::RenderBlock for RectCell {
             sw: Pt::new(x, y + height),
         }
     }
+
     fn fill(&self, block: &Self::Block, color: &Rgba<u8>, image: &mut RgbaImage) {
         let width = block.ne.x() - block.nw.x() + 1;
         let height = block.sw.y() - block.nw.y() + 1;
         rectangle_filled(image, block.nw, height, width, *color);
     }
+
     fn blend_fill(
         &self,
         block: &Self::Block,
@@ -232,16 +245,17 @@ impl crate::render::RenderBlock for RectCell {
         image: &mut RgbaImage,
     ) {
         use crate::render::opts::blend::{
-            calc_hsl_intensity, hsl_intensity, intensity, rgb_intensity,
+            calc_hsl_intensity, calc_intensity, hsl_intensity, rgb_intensity,
         };
+
         match blend {
             Blend::None(color) => self.fill(block, &color, image),
-            Blend::RGBIntensity(color) => {
-                let int = intensity(i as f32, max as f32);
+            Blend::RgbIntensity(color) => {
+                let int = calc_intensity(i as f32, max as f32);
                 let col = rgb_intensity(color, int);
                 self.fill(block, &col, image);
             }
-            Blend::HSLIntensity(color, min_l, max_l) => {
+            Blend::HslIntensity(color, min_l, max_l) => {
                 let int = calc_hsl_intensity(i as f64, max as f64, *min_l, *max_l);
                 #[cfg(test)]
                 log::debug!("i={} max={} int={:.2}", i, max, int);
@@ -250,6 +264,7 @@ impl crate::render::RenderBlock for RectCell {
             }
         }
     }
+
     fn edge_unlinked(
         &self,
         block: &Self::Block,
@@ -259,6 +274,7 @@ impl crate::render::RenderBlock for RectCell {
     ) {
         block.draw_side(n, image, *color);
     }
+
     fn edge_linked(
         &self,
         block: &Self::Block,
@@ -269,6 +285,7 @@ impl crate::render::RenderBlock for RectCell {
     ) {
         block.draw_dashed_side(n, width, color[3] as f32 / 255.0, image, *color);
     }
+
     fn text_pos(&self, block: &Self::Block, center: bool, padding: Pt<i32>) -> Pt<u32> {
         let width = (block.ne.x() - block.nw.x()) as i32;
         let height = (block.sw.y() - block.nw.y()) as i32;
@@ -287,6 +304,7 @@ impl crate::render::RenderBlock for RectCell {
             .u32()
         }
     }
+
     fn arrow(
         &self,
         block: &Self::Block,
@@ -297,6 +315,7 @@ impl crate::render::RenderBlock for RectCell {
         image: &mut RgbaImage,
     ) {
         use crate::render::opts::Arrow;
+
         match style {
             Arrow::Straight => imageproc::drawing::draw_line_segment_mut(
                 image,
@@ -312,6 +331,7 @@ impl crate::render::RenderBlock for RectCell {
             _ => todo!(),
         }
     }
+
     fn half_arrow(
         &self,
         block: &Self::Block,
@@ -321,6 +341,7 @@ impl crate::render::RenderBlock for RectCell {
         image: &mut RgbaImage,
     ) {
         use crate::render::opts::Arrow;
+
         match style {
             Arrow::Straight | Arrow::StraightCenter => imageproc::drawing::draw_line_segment_mut(
                 image,
@@ -334,131 +355,15 @@ impl crate::render::RenderBlock for RectCell {
     }
 }
 
-use crate::render::state::graph::{Builder, BuilderGraph};
-impl Orth<RectCell> {
-    /// Use default rendering options to render an image
-    pub fn render(&self) -> RgbaImage {
-        self.build_render().finish().render()
-    }
-
-    pub fn build_render<'g>(&'g self) -> BuilderGraph<'g, Self> {
-        Builder::graph(self)
-    }
-
-    pub fn build_render_owned<'g>(self) -> BuilderGraph<'g, Self> {
-        Builder::owned_graph(self)
-    }
-
-    pub fn dist(&self) -> crate::Dist {
-        crate::Dist::blank(self)
-    }
-
-    pub fn shortest_path(
-        &self,
-        dist: &crate::Dist,
-        end: usize,
-    ) -> Result<crate::Path, crate::Error> {
-        dist.shortest_path(self, end)
-    }
-
-    fn above(id: usize, width: usize) -> Option<usize> {
-        if id < width {
-            None
-        } else {
-            Some(id - width)
-        }
-    }
-
-    fn below(id: usize, width: usize, len: usize) -> Option<usize> {
-        if id >= len - width {
-            None
-        } else {
-            Some(id + width)
-        }
-    }
-
-    fn left(id: usize, width: usize) -> Option<usize> {
-        if id % width == 0 {
-            None
-        } else {
-            Some(id - 1)
-        }
-    }
-
-    fn right(id: usize, width: usize) -> Option<usize> {
-        if id % width == width - 1 {
-            None
-        } else {
-            Some(id + 1)
-        }
-    }
-
-    fn new_cell(id: usize, width: usize, len: usize) -> RectCell {
-        RectCell {
-            id,
-            row: id as u32 / width as u32,
-            col: id as u32 % width as u32,
-            n: [
-                Self::above(id, width),
-                Self::right(id, width),
-                Self::below(id, width, len),
-                Self::left(id, width),
-            ],
-            links: [None; 4],
-        }
-    }
-
-    fn new_cell_linked(id: usize, width: usize, len: usize) -> RectCell {
-        RectCell {
-            id,
-            row: id as u32 / width as u32,
-            col: id as u32 % width as u32,
-            n: [
-                Self::above(id, width),
-                Self::right(id, width),
-                Self::below(id, width, len),
-                Self::left(id, width),
-            ],
-            links: [
-                Self::above(id, width),
-                Self::right(id, width),
-                Self::below(id, width, len),
-                Self::left(id, width),
-            ],
-        }
-    }
-
-    pub fn new(height: usize, width: usize) -> Self {
-        let len = height * width;
-        Self {
-            len,
-            height,
-            width,
-            cells: (0..len).map(|id| Self::new_cell(id, width, len)).collect(),
-        }
-    }
-
-    pub fn new_linked(height: usize, width: usize) -> Self {
-        let len = height * width;
-        Self {
-            len,
-            height,
-            width,
-            cells: (0..len)
-                .map(|id| Self::new_cell_linked(id, width, len))
-                .collect(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
-    fn new_rect_grid() {
+    fn test_rect_grid_neighbors() {
         crate::logger(log::LevelFilter::Warn);
         use crate::graphs::Graph;
-        let grid = Orth::new(3, 3);
+        let grid: crate::Orth<RectCell> = crate::Orth::new(3, 3);
         log::debug!("{:#?}", grid);
         for (i, cell) in grid.cells().enumerate() {
             assert_eq!(i, cell.id);
@@ -473,18 +378,11 @@ mod tests {
         assert_eq!(grid.cells[7].n, [Some(4), Some(8), None, Some(6)]);
         assert_eq!(grid.cells[8].n, [Some(5), None, None, Some(7)]);
     }
+
     #[test]
     fn rect_image() -> Result<(), image::ImageError> {
         crate::logger(log::LevelFilter::Trace);
-        use crate::graphs::Graph;
-        let mut grid: Orth<RectCell> = Orth::new(4, 4);
-
-        grid.link(0, 1).unwrap();
-        grid.link(1, 5).unwrap();
-        grid.link(5, 6).unwrap();
-        grid.link(6, 10).unwrap();
-        grid.link(10, 14).unwrap();
-        grid.link(14, 15).unwrap();
+        let grid = crate::test::rect();
 
         grid.render().save("images/tests/rect_grid.png")
     }

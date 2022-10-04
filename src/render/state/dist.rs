@@ -16,7 +16,7 @@ where
     pub(crate) state:
         std::borrow::Cow<'r, crate::render::state::graph::State<'b, 'c, 'e, 'g, 'o, G>>,
     pub(crate) dist: std::borrow::Cow<'p, Dist>,
-    pub(crate) opts: std::borrow::Cow<'po, opts::Dist>,
+    pub(crate) opts: std::borrow::Cow<'po, opts::DistOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G> State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -36,7 +36,7 @@ where
         &*self.dist
     }
 
-    pub fn opts(&self) -> &opts::Dist {
+    pub fn opts(&self) -> &opts::DistOpts {
         &*self.opts
     }
 
@@ -163,18 +163,24 @@ where
     pub fn default_opts<'po>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
-            opts: Cow::Owned(opts::Dist::default()),
+            opts: Cow::Owned(opts::DistOpts::default()),
         }
     }
 
-    pub fn opts<'po>(self, opts: &'po opts::Dist) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+    pub fn opts<'po>(
+        self,
+        opts: &'po opts::DistOpts,
+    ) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
             opts: Cow::Borrowed(opts),
         }
     }
 
-    pub fn owned_opts<'po>(self, opts: opts::Dist) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+    pub fn owned_opts<'po>(
+        self,
+        opts: opts::DistOpts,
+    ) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
             opts: Cow::Owned(opts),
@@ -189,7 +195,7 @@ where
     <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
 {
     state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
-    opts: Cow<'po, opts::Dist>,
+    opts: Cow<'po, opts::DistOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
@@ -234,7 +240,7 @@ where
 {
     state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
     dist: Cow<'pa, Dist>,
-    opts: Cow<'po, opts::Dist>,
+    opts: Cow<'po, opts::DistOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>

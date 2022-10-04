@@ -151,6 +151,14 @@ pub(crate) fn new_image<G: RenderGraph>(
     colors: &opts::Colors,
 ) -> RgbaImage {
     let (x, y) = graph.size(size.block_height(), size.block_width(), size.padding());
+    if (x > std::i32::MAX as u32) | (y > std::i32::MAX as u32) {
+        panic!(
+            "Image dimensions exceeded max safe size of {}: width={} height={} ",
+            std::i32::MAX,
+            x,
+            y
+        );
+    }
     let mut image = RgbaImage::from_pixel(x, y, colors.image_bg());
     if let Some(bg) = colors.maze_bg() {
         let pad = size.padding() as i32;

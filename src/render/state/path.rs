@@ -15,7 +15,7 @@ where
 {
     state: std::borrow::Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
     path: std::borrow::Cow<'p, path::Path>,
-    opts: std::borrow::Cow<'po, opts::Path>,
+    opts: std::borrow::Cow<'po, opts::PathOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G> State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -35,7 +35,7 @@ where
         &*self.path
     }
 
-    pub fn opts(&self) -> &opts::Path {
+    pub fn opts(&self) -> &opts::PathOpts {
         &*self.opts
     }
 }
@@ -177,18 +177,24 @@ where
     pub fn default_opts<'po>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
-            opts: Cow::Owned(opts::Path::default()),
+            opts: Cow::Owned(opts::PathOpts::default()),
         }
     }
 
-    pub fn opts<'po>(self, opts: &'po opts::Path) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+    pub fn opts<'po>(
+        self,
+        opts: &'po opts::PathOpts,
+    ) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
             opts: Cow::Borrowed(opts),
         }
     }
 
-    pub fn owned_opts<'po>(self, opts: opts::Path) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
+    pub fn owned_opts<'po>(
+        self,
+        opts: opts::PathOpts,
+    ) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
         BuilderOpts {
             state: self.state,
             opts: Cow::Owned(opts),
@@ -203,7 +209,7 @@ where
     <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
 {
     state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
-    opts: Cow<'po, opts::Path>,
+    opts: Cow<'po, opts::PathOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G>
@@ -252,7 +258,7 @@ where
 {
     state: Cow<'r, graph::State<'b, 'c, 'e, 'g, 'o, G>>,
     path: Cow<'pa, path::Path>,
-    opts: Cow<'po, opts::Path>,
+    opts: Cow<'po, opts::PathOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G>
@@ -282,7 +288,7 @@ mod tests {
         let path = dist.shortest_path(&grid, 15).unwrap();
 
         let graph_renderer = grid.build_render().finish();
-        let opts = opts::Path::default();
+        let opts = opts::PathOpts::default();
         // let path_renderer = graph_renderer.;
         let path_renderer = State {
             state: Cow::Borrowed(&graph_renderer),

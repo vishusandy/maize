@@ -101,27 +101,14 @@ pub(crate) fn distance_simple<G: Graph>(graph: &G, start: usize) -> Dist {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Orth, RectCell};
     #[test]
     fn rect_dist() -> Result<(), image::ImageError> {
         crate::logger(log::LevelFilter::Trace);
-        use crate::graphs::Graph;
         use crate::render::opts;
         use crate::render::state::dist::State;
         use std::borrow::Cow;
 
-        let mut grid: Orth<RectCell> = Orth::new(4, 4);
-
-        grid.link(0, 1).unwrap();
-        grid.link(0, 4).unwrap();
-        grid.link(4, 8).unwrap();
-        grid.link(8, 12).unwrap();
-        grid.link(12, 13).unwrap();
-        grid.link(1, 5).unwrap();
-        grid.link(5, 6).unwrap();
-        grid.link(6, 10).unwrap();
-        grid.link(10, 14).unwrap();
-        grid.link(14, 15).unwrap();
+        let grid = crate::test::rect();
 
         let dist = distance_simple(&grid, 0);
 
@@ -132,7 +119,7 @@ mod tests {
         let dist_renderer = State {
             state: Cow::Borrowed(&graph_renderer),
             dist: Cow::Borrowed(&dist),
-            opts: Cow::Owned(opts::Dist::default()),
+            opts: Cow::Owned(opts::DistOpts::default()),
         };
         dist_renderer.render().save("images/tests/rect_dist.png")
     }

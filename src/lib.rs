@@ -36,6 +36,12 @@ fn logger(level: log::LevelFilter) {
 pub(crate) mod test {
     use super::{Orth, RectCell};
     use crate::graphs::Graph;
+
+    #[cfg(test)]
+    pub fn blank(size: u32) -> image::RgbaImage {
+        image::RgbaImage::from_pixel(size, size, image::Rgba([255, 255, 255, 255]))
+    }
+
     #[cfg(test)]
     pub(crate) fn rect() -> Orth<RectCell> {
         let mut grid: Orth<RectCell> = Orth::new(4, 4);

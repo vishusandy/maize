@@ -82,8 +82,7 @@ mod tests {
     use std::f64::consts::PI;
     #[test]
     fn torus() -> Result<(), image::ImageError> {
-        let mut image =
-            image::RgbaImage::from_vec(400, 400, Vec::from([255; 400 * 400 * 4])).unwrap();
+        let mut image = crate::test::blank(400);
         let torus = AnnulusSlice::new((200.0, 200.0), PI * 0.0, PI * 0.25, 50.0, 80.0);
         let (x, y) = torus.a();
         image.put_pixel(

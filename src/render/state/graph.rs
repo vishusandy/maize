@@ -2,7 +2,7 @@ use super::NodeState;
 use super::{RenderGraph, RenderState};
 use crate::edges::Undirected;
 use crate::graphs::{Graph, Node};
-use crate::render::opts::Basic;
+use crate::render::opts::GraphOpts;
 use image::{Rgba, RgbaImage};
 use std::borrow::Cow;
 
@@ -19,7 +19,7 @@ where
     pub(super) blocks: std::borrow::Cow<'b, Vec<<<G as Graph>::Node as Node>::Block>>,
     pub(super) node_state: std::borrow::Cow<'c, Vec<NodeState>>,
     pub(super) edges: std::borrow::Cow<'e, Undirected<Rgba<u8>>>,
-    pub(super) opts: std::borrow::Cow<'o, crate::render::opts::Basic>,
+    pub(super) opts: std::borrow::Cow<'o, crate::render::opts::GraphOpts>,
 }
 
 impl<'b, 'c, 'e, 'g, 'o, G> State<'b, 'c, 'e, 'g, 'o, G>
@@ -53,11 +53,11 @@ where
         &*self.graph
     }
 
-    pub fn opts(&self) -> &crate::render::opts::Basic {
+    pub fn opts(&self) -> &crate::render::opts::GraphOpts {
         &*self.opts
     }
 
-    pub fn set_opts(&mut self, opts: Cow<'o, crate::render::opts::Basic>) {
+    pub fn set_opts(&mut self, opts: Cow<'o, crate::render::opts::GraphOpts>) {
         self.opts = opts;
     }
 
@@ -214,16 +214,16 @@ where
     pub fn default_opts<'o>(self) -> BuilderOpts<'g, 'o, G> {
         BuilderOpts {
             graph: self.graph,
-            opts: Cow::Owned(Basic::default()),
+            opts: Cow::Owned(GraphOpts::default()),
         }
     }
-    pub fn owned_opts<'o>(self, opts: Basic) -> BuilderOpts<'g, 'o, G> {
+    pub fn owned_opts<'o>(self, opts: GraphOpts) -> BuilderOpts<'g, 'o, G> {
         BuilderOpts {
             graph: self.graph,
             opts: Cow::Owned(opts),
         }
     }
-    pub fn opts<'o>(self, opts: &'o Basic) -> BuilderOpts<'g, 'o, G> {
+    pub fn opts<'o>(self, opts: &'o GraphOpts) -> BuilderOpts<'g, 'o, G> {
         BuilderOpts {
             graph: self.graph,
             opts: Cow::Borrowed(opts),
@@ -245,7 +245,7 @@ where
     <G::Node as Node>::Block: Clone + std::fmt::Debug,
 {
     graph: std::borrow::Cow<'g, G>,
-    opts: std::borrow::Cow<'o, Basic>,
+    opts: std::borrow::Cow<'o, GraphOpts>,
 }
 impl<'g, 'o, G> BuilderOpts<'g, 'o, G>
 where
@@ -300,7 +300,7 @@ where
 {
     graph: std::borrow::Cow<'g, G>,
     blocks: std::borrow::Cow<'b, Vec<<<G as Graph>::Node as Node>::Block>>,
-    opts: std::borrow::Cow<'o, crate::render::opts::Basic>,
+    opts: std::borrow::Cow<'o, crate::render::opts::GraphOpts>,
 }
 impl<'b, 'g, 'o, G> BuilderBlocks<'b, 'g, 'o, G>
 where
@@ -345,7 +345,7 @@ where
 {
     graph: std::borrow::Cow<'g, G>,
     blocks: std::borrow::Cow<'b, Vec<<<G as Graph>::Node as Node>::Block>>,
-    opts: std::borrow::Cow<'o, crate::render::opts::Basic>,
+    opts: std::borrow::Cow<'o, crate::render::opts::GraphOpts>,
     node_state: std::borrow::Cow<'c, Vec<NodeState>>,
 }
 impl<'b, 'c, 'g, 'o, G> BuilderNodes<'b, 'c, 'g, 'o, G>
@@ -401,7 +401,7 @@ where
 {
     graph: std::borrow::Cow<'g, G>,
     blocks: std::borrow::Cow<'b, Vec<<<G as Graph>::Node as Node>::Block>>,
-    opts: std::borrow::Cow<'o, crate::render::opts::Basic>,
+    opts: std::borrow::Cow<'o, crate::render::opts::GraphOpts>,
     node_state: std::borrow::Cow<'c, Vec<NodeState>>,
     edges: std::borrow::Cow<'e, Undirected<Rgba<u8>>>,
 }

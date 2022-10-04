@@ -7,6 +7,15 @@ pub fn blank(size: u32) -> image::RgbaImage {
     image::RgbaImage::from_pixel(size, size, image::Rgba([255, 255, 255, 255]))
 }
 
+fn rect_grid(c: &mut Criterion) {
+    c.bench_function("rect_grid", |b| {
+        b.iter(|| {
+            let grid: Orth<RectCell> = Orth::new(6, 6);
+            grid.render()
+        })
+    });
+}
+
 fn rect_new_image(c: &mut Criterion) {
     c.bench_function("rect_render_new_image", |b| {
         b.iter(|| {
@@ -28,8 +37,14 @@ fn rect_render_only(c: &mut Criterion) {
 
 fn rect_same_image(c: &mut Criterion) {
     let grid: Orth<RectCell> = Orth::new(6, 6);
-    c.bench_function("rect_render_new_image", |b| b.iter(|| grid.render()));
+    c.bench_function("rect_same_image", |b| b.iter(|| grid.render()));
 }
 
-criterion_group!(rect, rect_new_image, rect_render_only, rect_same_image);
+criterion_group!(
+    rect,
+    rect_grid,
+    rect_new_image,
+    rect_render_only,
+    rect_same_image
+);
 criterion_main!(rect);
