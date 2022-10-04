@@ -21,18 +21,27 @@ impl<C: Node> Orth<C> {
 }
 impl<C: Node> Graph for Orth<C> {
     type Node = C;
+
     fn len(&self) -> usize {
         self.len
     }
+
     fn cell(&self, id: usize) -> &Self::Node {
         &self.cells[id]
     }
+
     fn cell_mut(&mut self, id: usize) -> &mut Self::Node {
         &mut self.cells[id]
     }
+
     fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_> {
         Box::new(Iter::new(self))
     }
+
+    fn cells_mut(&mut self) -> Box<dyn Iterator<Item = &mut Self::Node> + '_> {
+        Box::new(IterMut::new(self))
+    }
+
     fn link(&mut self, a: usize, b: usize) -> Result<(), crate::Error> {
         if a >= self.len {
             return Err(crate::Error::InvalidCell(a, self.len));
@@ -42,6 +51,7 @@ impl<C: Node> Graph for Orth<C> {
         }
         self.cells[a].link(b).and_then(|_| self.cells[b].link(a))
     }
+
     fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::Error> {
         self.check_id(a)
             .and_then(|_| self.check_id(b))
@@ -56,6 +66,7 @@ impl<C: Node> Graph for Orth<C> {
 pub struct Iter<'a, C: Node> {
     slice: &'a [C],
 }
+
 impl<'a, C: Node> Iter<'a, C> {
     fn new(grid: &'a Orth<C>) -> Self {
         Self {
@@ -77,6 +88,32 @@ impl<'a, C: Node> Iterator for Iter<'a, C> {
     }
 }
 
+pub struct IterMut<'a, C: Node> {
+    slice: &'a mut [C],
+}
+
+impl<'a, C: Node> IterMut<'a, C> {
+    fn new(grid: &'a mut Orth<C>) -> Self {
+        Self {
+            slice: &mut grid.cells[..],
+        }
+    }
+}
+
+impl<'a, C: Node> Iterator for IterMut<'a, C> {
+    type Item = &'a mut C;
+    fn next(&mut self) -> Option<Self::Item> {
+        let slice = std::mem::take(&mut self.slice);
+        match slice {
+            [first, rest @ ..] => {
+                self.slice = rest;
+                Some(first)
+            }
+            [] => None,
+        }
+    }
+}
+
 impl<C: RenderBlock> RenderGraph for Orth<C> {
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32) {
         (
@@ -84,12 +121,14 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
             (self.height) as u32 * (block_height + 1) + padding + padding,
         )
     }
+
     fn blocks(&self, height: u32, width: u32, padding: u32) -> Vec<<Self::Node as Node>::Block> {
         self.cells
             .iter()
             .map(|c| c.block(height, width, padding))
             .collect()
     }
+
     fn fill(
         &self,
         cell: &Self::Node,
@@ -99,6 +138,7 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
     ) {
         cell.fill(block, color, img);
     }
+
     fn blend_fill(
         &self,
         cell: &Self::Node,
@@ -110,6 +150,7 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
     ) {
         cell.blend_fill(block, i, max, blend, image);
     }
+
     fn text_pos(
         &self,
         cell: &Self::Node,
@@ -119,6 +160,7 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
     ) -> freehand::Pt<u32> {
         cell.text_pos(_block, center, padding)
     }
+
     fn edge(
         &self,
         cell: &Self::Node,
@@ -135,6 +177,7 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
             cell.edge_linked(block, n, dash_width, linked_color, image);
         }
     }
+
     fn arrow(
         &self,
         cell: &Self::Node,
@@ -147,6 +190,7 @@ impl<C: RenderBlock> RenderGraph for Orth<C> {
     ) {
         cell.arrow(block, from_n, to_n, style, color, image);
     }
+
     fn half_arrow(
         &self,
         cell: &Self::Node,

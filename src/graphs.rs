@@ -28,7 +28,9 @@ pub trait Graph {
     fn len(&self) -> usize;
     fn cell(&self, id: usize) -> &Self::Node;
     fn cell_mut(&mut self, id: usize) -> &mut Self::Node;
+    /// This should iterate over all cells in id order
     fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_>;
+    fn cells_mut(&mut self) -> Box<dyn Iterator<Item = &mut Self::Node> + '_>;
     fn link(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
     fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
 }
