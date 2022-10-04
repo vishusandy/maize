@@ -10,9 +10,9 @@ pub(crate) use path::Path;
 
 #[derive(Clone, Debug)]
 pub struct Basic {
-    size: Size,
-    colors: Colors,
-    text: Text,
+    pub size: Size,
+    pub colors: Colors,
+    pub text: Text,
 }
 
 impl Basic {
@@ -39,10 +39,10 @@ impl Default for Basic {
 
 #[derive(Clone, Debug)]
 pub struct Size {
-    block_height: u32,
-    block_width: u32,
-    padding: u32,
-    dash_width: u32,
+    pub block_height: u32,
+    pub block_width: u32,
+    pub padding: u32,
+    pub dash_width: u32,
 }
 
 impl Size {
@@ -73,14 +73,14 @@ impl Default for Size {
 
 #[derive(Clone, Debug)]
 pub struct Colors {
-    image_bg: Option<Rgba<u8>>,
-    maze_bg: Option<Rgba<u8>>,
-    cell_bg: Rgba<u8>,
-    edges: Rgba<u8>,
+    pub image_bg: Option<Rgba<u8>>,
+    pub maze_bg: Option<Rgba<u8>>,
+    pub cell_bg: Rgba<u8>,
+    pub edges: Rgba<u8>,
     /// Dashed edges will be blended using the color's alpha channel
-    dashed_edges: Rgba<u8>,
-    outer_edges: Rgba<u8>,
-    text: Rgba<u8>,
+    pub dashed_edges: Rgba<u8>,
+    pub outer_edges: Rgba<u8>,
+    pub text: Rgba<u8>,
 }
 
 impl Colors {
@@ -123,11 +123,11 @@ impl Default for Colors {
 
 #[derive(Clone, Debug)]
 pub struct Text {
-    show: bool,
-    center: bool,
-    width: f32,
-    height: f32,
-    padding: freehand::Pt<i32>,
+    pub show: bool,
+    pub center: bool,
+    pub width: f32,
+    pub height: f32,
+    pub padding: freehand::Pt<i32>,
 }
 impl Text {
     pub fn show(&self) -> bool {

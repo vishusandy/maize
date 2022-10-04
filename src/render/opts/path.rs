@@ -6,10 +6,10 @@ use image::Rgba;
 #[derive(Clone, Debug)]
 pub struct Path {
     /// If true override the text label to use the path step number instead of cell id
-    label_steps: bool,
-    arrows: Option<Rgba<u8>>,
-    style: Arrow,
-    path_bg: Blend,
+    pub label_steps: bool,
+    pub arrows: Option<Rgba<u8>>,
+    pub style: Arrow,
+    pub path_bg: Blend,
 }
 
 impl Path {

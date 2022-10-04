@@ -31,9 +31,6 @@ pub trait Graph {
     fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_>;
     fn link(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
     fn unlink(&mut self, a: usize, b: usize) -> Result<(), crate::Error>;
-    fn distances_equal(&self, start: usize) -> crate::Dist {
-        todo!()
-    }
 }
 
 // https://adventures.michaelfbryan.com/posts/daily/iterators/

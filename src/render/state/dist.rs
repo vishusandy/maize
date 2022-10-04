@@ -197,22 +197,30 @@ where
     G: RenderGraph + Clone + std::fmt::Debug,
     <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
 {
-    pub fn simplified_dist<'pa>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
-        todo!()
-    }
-
-    pub fn dist<'pa>(self, path: &'pa Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+    pub fn simplified_dist<'pa>(
+        self,
+        start: usize,
+    ) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        let dist = Dist::simple(&*self.state.graph, start);
         BuilderDist {
             state: self.state,
-            dist: Cow::Borrowed(path),
+            dist: Cow::Owned(dist),
             opts: self.opts,
         }
     }
 
-    pub fn owned_dist<'pa>(self, path: Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+    pub fn dist<'pa>(self, dist: &'pa Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
         BuilderDist {
             state: self.state,
-            dist: Cow::Owned(path),
+            dist: Cow::Borrowed(dist),
+            opts: self.opts,
+        }
+    }
+
+    pub fn owned_dist<'pa>(self, dist: Dist) -> BuilderDist<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        BuilderDist {
+            state: self.state,
+            dist: Cow::Owned(dist),
             opts: self.opts,
         }
     }

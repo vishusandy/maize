@@ -2,8 +2,8 @@ use crate::opts::blend::Blend;
 
 #[derive(Clone, Debug)]
 pub struct Dist {
-    label_dist: bool,
-    bg: Blend,
+    pub label_dist: bool,
+    pub bg: Blend,
 }
 
 impl Dist {
