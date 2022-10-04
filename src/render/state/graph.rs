@@ -30,6 +30,60 @@ where
     pub fn render(&self) -> RgbaImage {
         self.render_image()
     }
+
+    pub fn build_distance<'p, 'po, 'r>(
+        &'r self,
+        start: usize,
+    ) -> crate::render::state::dist::BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G> {
+        crate::render::state::dist::Builder::render_state(&self)
+    }
+
+    pub fn build_path<'p, 'po, 'r>(
+        &'r self,
+        start: usize,
+        end: usize,
+    ) -> Result<crate::render::state::path::BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>, crate::Error>
+    {
+        let dist = crate::Dist::simple(&*self.graph, start);
+        crate::Path::shortest_path(&*self.graph, &dist, end)
+            .map(|path| crate::render::state::path::Builder::render_state(self))
+    }
+
+    pub fn graph(&self) -> &G {
+        &*self.graph
+    }
+
+    pub fn opts(&self) -> &crate::render::opts::Basic {
+        &*self.opts
+    }
+
+    pub fn set_opts(&mut self, opts: Cow<'o, crate::render::opts::Basic>) {
+        self.opts = opts;
+    }
+
+    pub fn blocks(&self) -> &Vec<<<G as Graph>::Node as Node>::Block> {
+        &*self.blocks
+    }
+
+    pub(crate) fn set_blocks(&mut self, blocks: Cow<'b, Vec<<<G as Graph>::Node as Node>::Block>>) {
+        self.blocks = blocks;
+    }
+
+    pub fn node_state(&self) -> &Vec<NodeState> {
+        &*self.node_state
+    }
+
+    pub(crate) fn set_node_state(&mut self, node_state: Cow<'c, Vec<NodeState>>) {
+        self.node_state = node_state;
+    }
+
+    pub fn edges(&self) -> &Undirected<Rgba<u8>> {
+        &*self.edges
+    }
+
+    pub(crate) fn set_edges(&mut self, edges: Cow<'e, Undirected<Rgba<u8>>>) {
+        self.edges = edges;
+    }
 }
 
 impl<'b, 'c, 'e, 'g, 'o, G> RenderState<'b, 'c, 'e, 'g, 'o> for State<'b, 'c, 'e, 'g, 'o, G>
@@ -51,7 +105,7 @@ where
             }
         }
 
-        self.edges(&mut image);
+        self.draw_edges(&mut image);
         image
     }
 
@@ -90,7 +144,7 @@ where
         );
     }
 
-    fn edges(&self, image: &mut RgbaImage) {
+    fn draw_edges(&self, image: &mut RgbaImage) {
         for edge in self.edges.iter() {
             let id = edge.a().id();
             self.graph.edge(

@@ -349,6 +349,18 @@ impl Orth<RectCell> {
         Builder::owned_graph(self)
     }
 
+    pub fn dist(&self) -> crate::Dist {
+        crate::Dist::blank(self)
+    }
+
+    pub fn shortest_path(
+        &self,
+        dist: &crate::Dist,
+        end: usize,
+    ) -> Result<crate::Path, crate::Error> {
+        dist.shortest_path(self, end)
+    }
+
     fn above(id: usize, width: usize) -> Option<usize> {
         if id < width {
             None

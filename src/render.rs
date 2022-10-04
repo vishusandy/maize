@@ -142,7 +142,7 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
     fn render_image(&self) -> RgbaImage;
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, img: &mut RgbaImage);
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage);
-    fn edges(&self, img: &mut RgbaImage);
+    fn draw_edges(&self, img: &mut RgbaImage);
 }
 
 pub(crate) fn new_image<G: RenderGraph>(

@@ -26,6 +26,18 @@ where
     pub fn render(&self) -> RgbaImage {
         self.render_image()
     }
+
+    pub fn graph(&self) -> &crate::render::state::graph::State<'b, 'c, 'e, 'g, 'o, G> {
+        &*self.state
+    }
+
+    pub fn path(&self) -> &path::Path {
+        &*self.path
+    }
+
+    pub fn opts(&self) -> &opts::Path {
+        &*self.opts
+    }
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G> State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -92,7 +104,7 @@ where
             }
         }
 
-        self.edges(&mut image);
+        self.draw_edges(&mut image);
         image
     }
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, image: &mut RgbaImage) {
@@ -114,8 +126,8 @@ where
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, image: &mut RgbaImage) {
         self.state.text(cell, text, image)
     }
-    fn edges(&self, image: &mut RgbaImage) {
-        self.state.edges(image)
+    fn draw_edges(&self, image: &mut RgbaImage) {
+        self.state.draw_edges(image)
     }
 }
 
@@ -199,8 +211,14 @@ where
     G: RenderGraph + Clone + std::fmt::Debug,
     <<G as Graph>::Node as Node>::Block: Clone + std::fmt::Debug,
 {
-    pub fn simplified_path<'pa>(self) -> BuilderOpts<'b, 'c, 'e, 'g, 'o, 'po, 'r, G> {
-        todo!()
+    pub fn simplified_path<'pa>(
+        self,
+        start: usize,
+        end: usize,
+    ) -> BuilderPath<'b, 'c, 'e, 'g, 'o, 'pa, 'po, 'r, G> {
+        let dist = crate::Dist::simple(&*self.state.graph, start);
+        let path = crate::Path::shortest_path(&*self.state.graph, &dist, end).unwrap();
+        self.owned_path(path)
     }
 
     pub fn path<'pa>(
@@ -254,35 +272,18 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::graphs::orth::nodes::rect::RectCell;
-    use crate::graphs::orth::Orth;
     #[test]
     fn rect_path() -> Result<(), image::ImageError> {
-        use crate::graphs::Graph;
         use std::borrow::Cow;
         crate::logger(log::LevelFilter::Trace);
-        let mut grid: Orth<RectCell> = Orth::new(4, 4);
-        grid.link(0, 1).unwrap();
-        grid.link(1, 5).unwrap();
-        grid.link(5, 6).unwrap();
-        grid.link(6, 7).unwrap();
-        grid.link(7, 11).unwrap();
-        grid.link(11, 10).unwrap();
-        grid.link(10, 9).unwrap();
-        grid.link(9, 13).unwrap();
+        let grid = crate::test::rect();
 
-        let mut path = path::Path::new(&grid);
-        path.add(0).unwrap();
-        path.add(1).unwrap();
-        path.add(5).unwrap();
-        path.add(6).unwrap();
-        path.add(7).unwrap();
-        path.add(11).unwrap();
-        path.add(10).unwrap();
-        path.add(9).unwrap();
-        path.add(13).unwrap();
+        let dist = crate::algo::dist::Dist::simple(&grid, 0);
+        let path = dist.shortest_path(&grid, 15).unwrap();
+
         let graph_renderer = grid.build_render().finish();
         let opts = opts::Path::default();
+        // let path_renderer = graph_renderer.;
         let path_renderer = State {
             state: Cow::Borrowed(&graph_renderer),
             path: Cow::Borrowed(&path),

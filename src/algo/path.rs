@@ -11,29 +11,93 @@ pub struct Path {
     pub(crate) max: Option<usize>,
 }
 impl Path {
-    pub fn new<G: Graph>(graph: &G) -> Self {
+    pub fn blank<G: Graph>(graph: &G) -> Self {
         Self {
+            /// maps steps (index) to cell ids (values)
             path: Vec::with_capacity(graph.len() / G::Node::N),
+            /// tracks which step number each cell has
             cells: vec![None; graph.len()],
             max: None,
         }
     }
-    pub fn add(&mut self, id: usize) -> Result<(), ()> {
+
+    pub(crate) fn with_capacity<G: Graph>(graph: &G, max: usize) -> Self {
+        Self {
+            path: Vec::with_capacity(max + 1),
+            cells: vec![None; graph.len()],
+            max: Some(max),
+        }
+    }
+
+    pub fn shortest_path<G: Graph>(
+        graph: &G,
+        dist: &crate::algo::dist::Dist,
+        end: usize,
+    ) -> Result<Self, crate::Error> {
+        shortest_path(graph, dist, end)
+    }
+
+    pub fn add(&mut self, id: usize) -> Result<(), crate::Error> {
         if self.cells[id].is_none() {
             self.cells[id] = Some(self.path.len());
             self.path.push(id);
             Ok(())
         } else {
-            Err(())
+            Err(crate::Error::InvalidPathAdd(id))
         }
     }
+
     pub fn step_num(&self, cell_id: usize) -> Option<usize> {
         self.cells[cell_id]
     }
+
     pub fn step(&self, step: usize) -> usize {
         self.path[step]
     }
+
     pub fn set_max(&mut self, max: Option<usize>) {
         self.max = max;
+    }
+
+    pub(crate) fn reverse(&mut self) {
+        self.path.reverse();
+        let max = self.max.unwrap_or_else(|| self.path.len() - 1);
+        self.cells
+            .iter_mut()
+            .flatten()
+            .for_each(|step| *step = max - *step);
+    }
+}
+
+fn shortest_path<G: Graph>(
+    graph: &G,
+    dist: &crate::algo::dist::Dist,
+    end: usize,
+) -> Result<crate::algo::path::Path, crate::error::Error> {
+    if let Some(d) = dist.dist(end) {
+        let mut path = Path::with_capacity(graph, d);
+        let mut cell = graph.cell(end);
+
+        for _ in 0..=d {
+            if let Err(e) = path.add(cell.id()) {
+                return Err(e);
+            }
+
+            let prev = cell
+                .links()
+                .reduce(|min, id| {
+                    if dist.dist(*id) < dist.dist(*min) {
+                        id
+                    } else {
+                        min
+                    }
+                })
+                .unwrap();
+            cell = graph.cell(*prev);
+        }
+        path.reverse();
+        Ok(path)
+    } else {
+        Err(crate::error::Error::NoPathAvailable(end))
     }
 }

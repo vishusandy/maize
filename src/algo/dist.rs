@@ -1,4 +1,4 @@
-use crate::graphs::Graph;
+use crate::graphs::{Graph, Node};
 use crate::util::AddUpdate;
 
 #[derive(Clone, Debug)]
@@ -9,6 +9,10 @@ pub struct Dist {
 }
 
 impl Dist {
+    pub fn simple<G: Graph>(graph: &G, start: usize) -> Self {
+        distance_simple(graph, start)
+    }
+
     pub(crate) fn blank<G: Graph>(graph: &G) -> Self {
         Self {
             dist: vec![None; graph.len()],
@@ -52,10 +56,21 @@ impl Dist {
             }
         }
     }
+
+    pub fn shortest_path<G: Graph>(
+        &self,
+        graph: &G,
+        end: usize,
+    ) -> Result<crate::algo::path::Path, crate::error::Error> {
+        if let Some(d) = self.dist(end) {
+            crate::algo::path::Path::shortest_path(graph, self, end)
+        } else {
+            Err(crate::error::Error::NoPathAvailable(end))
+        }
+    }
 }
 
 pub(crate) fn distance_simple<G: Graph>(graph: &G, start: usize) -> Dist {
-    use crate::graphs::Node;
     let mut dist = Dist::blank(graph);
     let mut max = 0;
     let mut frontier: Vec<usize> = Vec::with_capacity(G::Node::N);

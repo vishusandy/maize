@@ -4,11 +4,11 @@ use thiserror::Error;
 pub enum Error {
     #[error("Invalid operation: no neighbor from node {0} to {1}")]
     InvalidNeighbor(usize, usize),
-    #[error("Already linked: cell {0} is already linked with {1}")]
+    #[error("Already linked: node {0} is already linked with {1}")]
     AlreadyLinked(usize, usize),
-    #[error("Unlink operation failed: cell {0} is not linked with {1}")]
+    #[error("Unlink operation failed: node {0} is not linked with {1}")]
     AlreadyUnlinked(usize, usize),
-    #[error("Invalid cell: id {0} was specified but grid only contains {1} cells")]
+    #[error("Invalid cell: id {0} was specified but grid only contains {1} nodes")]
     InvalidCell(usize, usize),
     #[error("Invalid id: graph contains only {1} nodes and node {0} was specified")]
     InvalidId(usize, usize),
@@ -18,4 +18,8 @@ pub enum Error {
     InvalidEdge(usize, usize),
     #[error("Mismatched list size: list has a length of {0} while graph has a length of {1}")]
     MismatchedListSize(usize, usize),
+    #[error("No path available for node {0}")]
+    NoPathAvailable(usize),
+    #[error("Invalid path add: path already contains node {0}")]
+    InvalidPathAdd(usize),
 }

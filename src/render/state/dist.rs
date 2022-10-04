@@ -27,6 +27,28 @@ where
     pub fn render(&self) -> RgbaImage {
         self.render_image()
     }
+
+    pub fn graph(&self) -> &crate::render::state::graph::State<'b, 'c, 'e, 'g, 'o, G> {
+        &*self.state
+    }
+
+    pub fn dist(&self) -> &Dist {
+        &*self.dist
+    }
+
+    pub fn opts(&self) -> &opts::Dist {
+        &*self.opts
+    }
+
+    pub fn build_path(
+        &'r self,
+        start: usize,
+        end: usize,
+    ) -> Result<crate::render::state::path::BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G>, crate::Error>
+    {
+        crate::Path::shortest_path(&*self.state.graph, &self.dist, end)
+            .map(|path| crate::render::state::path::Builder::render_state(&*self.state))
+    }
 }
 
 impl<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G> State<'b, 'c, 'e, 'g, 'o, 'p, 'po, 'r, G>
@@ -65,7 +87,7 @@ where
                 }
             }
         }
-        self.edges(&mut image);
+        self.draw_edges(&mut image);
         image
     }
 
@@ -90,8 +112,8 @@ where
         self.state.text(cell, text, image)
     }
 
-    fn edges(&self, image: &mut RgbaImage) {
-        self.state.edges(image)
+    fn draw_edges(&self, image: &mut RgbaImage) {
+        self.state.draw_edges(image)
     }
 }
 

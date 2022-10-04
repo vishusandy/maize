@@ -58,6 +58,6 @@ pub enum Arrow {
 
 impl Default for Arrow {
     fn default() -> Self {
-        Self::Straight
+        Self::StraightCenter
     }
 }
