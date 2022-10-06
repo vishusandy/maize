@@ -31,16 +31,16 @@ impl Blend {
     /// `min_l` and `max_l` represent the lowest and highest lightness values to use when
     /// blending intensities.
     pub fn blend_hsl(h: f64, s: f64, min_l: f64, max_l: f64) -> Result<Self, crate::Error> {
-        if (h < 0.0) | (h > 360.0) {
+        if !(0.0..=360.0).contains(&h) {
             return Err(crate::Error::InvalidHslH(h));
         }
-        if (s < 0.0) | (s > 1.0) {
+        if !(0.0..=1.0).contains(&s) {
             return Err(crate::Error::InvalidHslS(s));
         }
-        if (min_l < 0.0) | (min_l > 1.0) {
+        if !(0.0..=1.0).contains(&min_l) {
             return Err(crate::Error::InvalidHslL(min_l));
         }
-        if (max_l < 0.0) | (max_l > 1.0) {
+        if !(0.0..=1.0).contains(&max_l) {
             return Err(crate::Error::InvalidHslL(max_l));
         }
 

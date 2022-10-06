@@ -102,13 +102,11 @@ impl<V> Undirected<V> {
             Err(Error::InvalidId(id, self.cells.len()))
         } else if n >= self.cells[id].len() {
             Err(Error::InvalidNeighbor(n, self.cells[id].len()))
+        } else if let Some(e) = self.cells[id][n] {
+            self.edges[e].v = value;
+            Ok(())
         } else {
-            if let Some(e) = self.cells[id][n] {
-                self.edges[e].v = value;
-                Ok(())
-            } else {
-                Err(Error::InvalidEdge(id, n))
-            }
+            Err(Error::InvalidEdge(id, n))
         }
     }
 

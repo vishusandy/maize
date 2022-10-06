@@ -8,7 +8,7 @@ pub(crate) use path::PathOpts;
 
 use image::Rgba;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct GraphOpts {
     size: Size,
     colors: Colors,
@@ -16,7 +16,7 @@ pub struct GraphOpts {
 }
 
 impl GraphOpts {
-    pub fn new() -> GraphOptsBuilder {
+    pub fn build() -> GraphOptsBuilder {
         GraphOptsBuilder::new()
     }
 
@@ -33,16 +33,6 @@ impl GraphOpts {
     }
 }
 
-impl Default for GraphOpts {
-    fn default() -> Self {
-        Self {
-            size: Size::default(),
-            colors: Colors::default(),
-            text: Text::default(),
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct Size {
     block_height: u32,
@@ -52,7 +42,7 @@ pub struct Size {
 }
 
 impl Size {
-    pub fn new() -> SizeBuilder {
+    pub fn build() -> SizeBuilder {
         SizeBuilder::new()
     }
 
@@ -97,7 +87,7 @@ pub struct Colors {
 }
 
 impl Colors {
-    pub fn new() -> ColorsBuilder {
+    pub fn build() -> ColorsBuilder {
         ColorsBuilder::new()
     }
 
@@ -153,7 +143,7 @@ pub struct Text {
     padding: freehand::Pt<i32>,
 }
 impl Text {
-    pub fn new() -> TextBuilder {
+    pub fn build() -> TextBuilder {
         TextBuilder::new()
     }
 
@@ -197,7 +187,7 @@ impl Default for Text {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct GraphOptsBuilder {
     size: Option<Size>,
     colors: Option<Colors>,
@@ -206,18 +196,14 @@ pub struct GraphOptsBuilder {
 
 impl GraphOptsBuilder {
     pub fn new() -> Self {
-        Self {
-            size: None,
-            colors: None,
-            text: None,
-        }
+        Self::default()
     }
 
     pub fn build(self) -> GraphOpts {
         GraphOpts {
-            size: self.size.unwrap_or(Size::default()),
-            colors: self.colors.unwrap_or(Colors::default()),
-            text: self.text.unwrap_or(Text::default()),
+            size: self.size.unwrap_or_default(),
+            colors: self.colors.unwrap_or_default(),
+            text: self.text.unwrap_or_default(),
         }
     }
 
@@ -243,21 +229,17 @@ impl GraphOptsBuilder {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SizeBuilder {
     block_height: Option<u32>,
     block_width: Option<u32>,
     padding: Option<u32>,
     dash_width: Option<u32>,
 }
+
 impl SizeBuilder {
     pub fn new() -> Self {
-        Self {
-            block_height: None,
-            block_width: None,
-            padding: None,
-            dash_width: None,
-        }
+        Self::default()
     }
 
     pub fn build(self) -> Size {
@@ -306,7 +288,7 @@ impl SizeBuilder {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ColorsBuilder {
     image_bg: Option<Rgba<u8>>,
     maze_bg: Option<Rgba<u8>>,
@@ -319,15 +301,7 @@ pub struct ColorsBuilder {
 
 impl ColorsBuilder {
     pub fn new() -> Self {
-        Self {
-            image_bg: None,
-            maze_bg: None,
-            cell_bg: None,
-            edges: None,
-            dashed_edges: None,
-            outer_edges: None,
-            text: None,
-        }
+        Self::default()
     }
 
     pub fn build(self) -> Colors {
@@ -393,7 +367,7 @@ impl ColorsBuilder {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TextBuilder {
     show: Option<bool>,
     center: Option<bool>,
@@ -404,13 +378,7 @@ pub struct TextBuilder {
 
 impl TextBuilder {
     pub fn new() -> Self {
-        Self {
-            show: None,
-            center: None,
-            width: None,
-            height: None,
-            padding: None,
-        }
+        Self::default()
     }
 
     pub fn build(self) -> Text {

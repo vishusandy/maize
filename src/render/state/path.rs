@@ -113,7 +113,7 @@ where
                 cell,
                 &self.state.blocks[cell.id()],
                 step,
-                self.path.max.unwrap_or_else(|| self.path.path.len() - 1),
+                self.path.max.unwrap_or(self.path.path.len() - 1),
                 self.opts.path_bg(),
                 image,
             )

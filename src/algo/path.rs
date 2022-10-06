@@ -61,7 +61,7 @@ impl Path {
 
     pub(crate) fn reverse(&mut self) {
         self.path.reverse();
-        let max = self.max.unwrap_or_else(|| self.path.len() - 1);
+        let max = self.max.unwrap_or(self.path.len() - 1);
         self.cells
             .iter_mut()
             .flatten()

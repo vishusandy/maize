@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-#![feature(const_fn_floating_point_arithmetic)]
+// #![feature(const_fn_floating_point_arithmetic)]
 
 mod algo;
 mod drawing;
@@ -19,7 +19,7 @@ pub use crate::graphs::orth::Orth;
 pub use crate::graphs::Graph;
 pub use crate::render::opts;
 
-const DEFAULT_NEIGHBORS: usize = 6;
+pub const DEFAULT_NEIGHBORS: usize = 6;
 
 #[cfg(test)]
 fn logger(level: log::LevelFilter) {

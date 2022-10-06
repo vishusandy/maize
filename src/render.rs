@@ -97,6 +97,7 @@ pub trait RenderGraph: Graph {
         padding: Pt<i32>,
     ) -> Pt<u32>;
 
+    #[allow(clippy::too_many_arguments)]
     fn edge(
         &self,
         cell: &Self::Node,
@@ -108,6 +109,7 @@ pub trait RenderGraph: Graph {
         image: &mut RgbaImage,
     );
 
+    #[allow(clippy::too_many_arguments)]
     fn arrow(
         &self,
         cell: &Self::Node,
@@ -159,6 +161,7 @@ pub(crate) fn new_image<G: RenderGraph>(
             y
         );
     }
+
     let mut image = RgbaImage::from_pixel(x, y, colors.image_bg());
     if let Some(bg) = colors.maze_bg() {
         let pad = size.padding() as i32;

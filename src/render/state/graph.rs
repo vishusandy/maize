@@ -31,14 +31,14 @@ where
         self.render_image()
     }
 
-    pub fn build_distance<'p, 'po, 'r>(
+    pub fn build_distance<'r>(
         &'r self,
         start: usize,
     ) -> crate::render::state::dist::BuilderState<'b, 'c, 'e, 'g, 'o, 'r, G> {
-        crate::render::state::dist::Builder::render_state(&self)
+        crate::render::state::dist::Builder::render_state(self)
     }
 
-    pub fn build_path<'p, 'po, 'r>(
+    pub fn build_path<'r>(
         &'r self,
         start: usize,
         end: usize,
@@ -148,7 +148,7 @@ where
         for edge in self.edges.iter() {
             let id = edge.a().id();
             self.graph.edge(
-                &self.graph.cell(id),
+                self.graph.cell(id),
                 &self.blocks[id],
                 edge.a().side(),
                 self.opts.size().dash_width(),
@@ -161,7 +161,7 @@ where
         self.edges.iter_outer().for_each(|(conn, col)| {
             let id = conn.id();
             self.graph.edge(
-                &self.graph.cell(id),
+                self.graph.cell(id),
                 &self.blocks[id],
                 conn.side(),
                 self.opts.size().dash_width(),
@@ -186,7 +186,7 @@ impl Builder {
             graph: Cow::Owned(grid),
         }
     }
-    pub fn graph<'g, G>(grid: &'g G) -> BuilderGraph<'g, G>
+    pub fn graph<G>(grid: &G) -> BuilderGraph<'_, G>
     where
         G: RenderGraph + Clone + std::fmt::Debug,
         <G::Node as Node>::Block: Clone + std::fmt::Debug,

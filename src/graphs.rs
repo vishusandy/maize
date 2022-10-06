@@ -25,6 +25,9 @@ pub trait Node {
 
 pub trait Graph {
     type Node: Node;
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
     fn len(&self) -> usize;
     fn cell(&self, id: usize) -> &Self::Node;
     fn cell_mut(&mut self, id: usize) -> &mut Self::Node;
@@ -53,10 +56,7 @@ impl<'a> Iterator for Neighbors<'a> {
         match self.slice {
             [first, rest @ ..] => {
                 self.slice = rest;
-                first
-                    .as_ref()
-                    .map(|s| Some(s))
-                    .unwrap_or_else(|| self.next())
+                first.as_ref().map(Some).unwrap_or_else(|| self.next())
             }
             [] => None,
         }

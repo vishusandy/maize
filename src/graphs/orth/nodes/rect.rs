@@ -167,10 +167,9 @@ impl Node for RectCell {
     }
 
     fn neighbor_id(&self, cell: usize) -> Option<usize> {
-        self.n.iter().position(|n| match n {
-            Some(n) if *n == cell => true,
-            _ => false,
-        })
+        self.n
+            .iter()
+            .position(|n| matches!(n, Some(n) if *n == cell))
     }
 
     fn links(&self) -> Neighbors {
@@ -249,7 +248,7 @@ impl crate::render::RenderBlock for RectCell {
         };
 
         match blend {
-            Blend::None(color) => self.fill(block, &color, image),
+            Blend::None(color) => self.fill(block, color, image),
             Blend::RgbIntensity(color) => {
                 let int = calc_intensity(i as f32, max as f32);
                 let col = rgb_intensity(color, int);
