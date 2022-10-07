@@ -64,22 +64,22 @@ impl RectBlock {
 
     fn draw_n(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
-        horizontal_line(image, p.0.y() - 1, p.0.x(), p.1.x(), color);
+        horizontal_line(image, (p.0.x(), p.0.y() - 1), p.1.x(), color);
     }
 
     fn draw_s(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.s();
-        horizontal_line(image, p.0.y(), p.0.x(), p.1.x(), color);
+        horizontal_line(image, (p.0.x(), p.0.y()), p.1.x(), color);
     }
 
     fn draw_w(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.w();
-        vertical_line(image, p.0.x(), p.0.y(), p.1.y(), color);
+        vertical_line(image, (p.0.x(), p.0.y()), p.1.y(), color);
     }
 
     fn draw_e(&self, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.e();
-        vertical_line(image, p.0.x(), p.0.y(), p.1.y(), color);
+        vertical_line(image, (p.0.x(), p.0.y()), p.1.y(), color);
     }
 
     fn draw_side(&self, n: usize, image: &mut RgbaImage, color: Rgba<u8>) {
@@ -94,22 +94,50 @@ impl RectBlock {
 
     fn draw_dashed_n(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.n();
-        horizontal_dashed_line_alpha(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
+        horizontal_dashed_line_alpha(
+            image,
+            (p.0.x() + 1, p.0.y()),
+            p.1.x(),
+            width,
+            opacity,
+            color,
+        );
     }
 
     fn draw_dashed_s(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.s();
-        horizontal_dashed_line_alpha(image, p.0.y(), p.0.x() + 1, p.1.x(), width, opacity, color);
+        horizontal_dashed_line_alpha(
+            image,
+            (p.0.x() + 1, p.0.y()),
+            p.1.x(),
+            width,
+            opacity,
+            color,
+        );
     }
 
     fn draw_dashed_w(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.w();
-        vertical_dashed_line_alpha(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
+        vertical_dashed_line_alpha(
+            image,
+            (p.0.x(), p.0.y() + 1),
+            p.1.y(),
+            width,
+            opacity,
+            color,
+        );
     }
 
     fn draw_dashed_e(&self, width: u32, opacity: f32, image: &mut RgbaImage, color: Rgba<u8>) {
         let p = self.e();
-        vertical_dashed_line_alpha(image, p.0.x(), p.0.y() + 1, p.1.y(), width, opacity, color);
+        vertical_dashed_line_alpha(
+            image,
+            (p.0.x(), p.0.y() + 1),
+            p.1.y(),
+            width,
+            opacity,
+            color,
+        );
     }
 
     fn draw_dashed_side(
