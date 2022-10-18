@@ -20,25 +20,25 @@ impl<C: Node> Orth<C> {
     }
 }
 impl<C: Node> Graph for Orth<C> {
-    type Node = C;
+    type Node = C;     
 
     fn len(&self) -> usize {
         self.len
     }
 
-    fn cell(&self, id: usize) -> &Self::Node {
+    fn node(&self, id: usize) -> &Self::Node {
         &self.cells[id]
     }
 
-    fn cell_mut(&mut self, id: usize) -> &mut Self::Node {
+    fn node_mut(&mut self, id: usize) -> &mut Self::Node {
         &mut self.cells[id]
     }
 
-    fn cells(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_> {
+    fn nodes(&self) -> Box<dyn Iterator<Item = &Self::Node> + '_> {
         Box::new(Iter::new(self))
     }
 
-    fn cells_mut(&mut self) -> Box<dyn Iterator<Item = &mut Self::Node> + '_> {
+    fn nodes_mut(&mut self) -> Box<dyn Iterator<Item = &mut Self::Node> + '_> {
         Box::new(IterMut::new(self))
     }
 

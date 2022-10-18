@@ -76,12 +76,10 @@ fn shortest_path<G: Graph>(
 ) -> Result<crate::algo::path::Path, crate::error::Error> {
     if let Some(d) = dist.dist(end) {
         let mut path = Path::with_capacity(graph, d);
-        let mut cell = graph.cell(end);
+        let mut cell = graph.node(end);
 
         for _ in 0..=d {
-            if let Err(e) = path.add(cell.id()) {
-                return Err(e);
-            }
+            path.add(cell.id())?;
 
             let prev = cell
                 .links()
@@ -93,7 +91,7 @@ fn shortest_path<G: Graph>(
                     }
                 })
                 .unwrap();
-            cell = graph.cell(*prev);
+            cell = graph.node(*prev);
         }
         path.reverse();
         Ok(path)

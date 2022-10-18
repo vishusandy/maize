@@ -125,14 +125,14 @@ impl<V> Undirected<V> {
         outer: O,
     ) -> Self {
         let mut cells: Vec<SmallVec<[Option<usize>; DEFAULT_NEIGHBORS]>> = (0..grid.len())
-            .map(|i| (0..grid.cell(i).max_neighbors()).map(|_| None).collect())
+            .map(|i| (0..grid.node(i).max_neighbors()).map(|_| None).collect())
             .collect();
         let mut edges: Vec<UndirEdge<V>> = Vec::with_capacity(grid.len() * G::Node::N); // allocate enough space to accomodate all edges - even in a wrap-around style grid (e.g., a cyclinder)
         let mut outside: Vec<(Conn, V)> = Vec::with_capacity(grid.len()); // default capacity could be improved here with a Graph method
-        for cell in grid.cells() {
+        for cell in grid.nodes() {
             for (i, neighbor) in cell.all_neighbors().iter().enumerate() {
                 if let Some(n) = neighbor {
-                    let neighbor = grid.cell(*n);
+                    let neighbor = grid.node(*n);
                     if let Some(nside) = neighbor.neighbor_id(cell.id()) {
                         if let Some(e) = cells[*n][nside] {
                             cells[cell.id()][i] = Some(e); // an existing neighbor has listed this edge already - use the corresponding edge

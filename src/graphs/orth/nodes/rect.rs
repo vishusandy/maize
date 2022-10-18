@@ -1,7 +1,7 @@
 use crate::graphs::{Block, Neighbors, Node};
 use crate::render::opts::blend::Blend;
 use crate::Error;
-use freehand::*;
+use freehand::{lines::*, shapes::rectangle_filled, Pt};
 use image::{Rgba, RgbaImage};
 
 #[derive(Clone, Debug)]
@@ -392,7 +392,7 @@ mod tests {
         use crate::graphs::Graph;
         let grid: crate::Orth<RectCell> = crate::Orth::new(3, 3);
         log::debug!("{:#?}", grid);
-        for (i, cell) in grid.cells().enumerate() {
+        for (i, cell) in grid.nodes().enumerate() {
             assert_eq!(i, cell.id);
         }
         assert_eq!(grid.cells[0].n, [None, Some(1), Some(3), None]);
@@ -408,7 +408,7 @@ mod tests {
 
     #[test]
     fn rect_image() -> Result<(), image::ImageError> {
-        crate::logger(log::LevelFilter::Trace);
+        crate::logger(crate::LOG_LEVEL);
         let grid = crate::test::rect();
 
         grid.render().save("images/tests/rect_grid.png")

@@ -1,7 +1,9 @@
+mod anim;
 pub(crate) mod blend;
 mod dist;
 mod path;
 
+pub(crate) use anim::AnimOpts;
 pub(crate) use dist::DistOpts;
 pub(crate) use path::Arrow;
 pub(crate) use path::PathOpts;

@@ -62,6 +62,7 @@ pub(crate) trait RenderBlock: Node {
     );
 }
 pub trait RenderGraph: Graph {
+    /// Returns the width and height
     fn size(&self, block_height: u32, block_width: u32, padding: u32) -> (u32, u32);
 
     fn blocks(
@@ -145,6 +146,13 @@ pub(crate) trait RenderState<'b, 'c, 'e, 'g, 'o> {
     fn fill(&self, cell: &<Self::Graph as Graph>::Node, img: &mut RgbaImage);
     fn text(&self, cell: &<Self::Graph as Graph>::Node, text: &str, img: &mut RgbaImage);
     fn draw_edges(&self, img: &mut RgbaImage);
+    /// Returns the width and height
+    fn size(&self) -> (u32, u32);
+
+    fn edge(&self, id: usize, n: usize) -> Option<Rgba<u8>>;
+    fn set_edge(&mut self, id: usize, n: usize);
+    fn bg(&self, id: usize) -> Option<Rgba<u8>>;
+    fn set_bg(&mut self, id: usize, color: Option<Rgba<u8>>);
 }
 
 pub(crate) fn new_image<G: RenderGraph>(

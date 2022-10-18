@@ -11,10 +11,11 @@ imageproc = "0.23.0"
 freehand = { git = "https://github.com/vishusandy/freehand" }
 lazy_static = "1.4.0"
 rusttype = "0.9.2"
-smallvec = "1.9.0"
+smallvec = { version = "1.9.0", features = ["const_generics"] }
 thiserror = "1.0.32"
 rand = "0.8.5"
 hsl = "0.1.1"
+webp-animation = "0.7.0"
 
 [dev-dependencies]
 rand_xoshiro = "0.6.0"

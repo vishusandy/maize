@@ -85,7 +85,7 @@ where
             self.state.opts.colors(),
         );
 
-        for cell in self.state.graph.cells() {
+        for cell in self.state.graph.nodes() {
             self.fill(cell, &mut image);
 
             if let Some(arrow) = self.opts.arrows() {
@@ -128,6 +128,9 @@ where
     }
     fn draw_edges(&self, image: &mut RgbaImage) {
         self.state.draw_edges(image)
+    }
+    fn size(&self) -> (u32, u32) {
+        self.state.size()
     }
 }
 

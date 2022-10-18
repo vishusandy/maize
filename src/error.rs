@@ -2,6 +2,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error("Zero sized graph: there are no nodes in this graph")]
+    ZeroSizedGraph(),
     #[error("Invalid operation: no neighbor from node {0} to {1}")]
     InvalidNeighbor(usize, usize),
     #[error("Already linked: node {0} is already linked with {1}")]
@@ -28,4 +30,12 @@ pub enum Error {
     InvalidHslS(f64),
     #[error("Invalid HSL value: l must be in the range [0, 1] but found {0}")]
     InvalidHslL(f64),
+    #[error("Animation error: {0}")]
+    AnimationError(webp_animation::Error),
+}
+
+impl From<webp_animation::Error> for Error {
+    fn from(error: webp_animation::Error) -> Self {
+        Self::AnimationError(error)
+    }
 }

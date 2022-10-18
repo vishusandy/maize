@@ -1,4 +1,9 @@
 
+
+http://members.chello.at/~easyfilter/bresenham.html
+
+
+
 Adjust of Midpoint circle algorithm for aesthetics
   https://stackoverflow.com/questions/36897585/slightly-change-the-bresenham-midpoint-circle-algorithm-for-nicer-results
     https://jsfiddle.net/7ru55fa3/9/

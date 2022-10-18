@@ -1,3 +1,4 @@
+pub(crate) mod anim;
 pub(crate) mod dist;
 pub(crate) mod graph;
 pub(crate) mod path;
@@ -17,5 +18,13 @@ impl NodeState {
     }
     pub fn vec(len: usize, color: &Rgba<u8>) -> Vec<Self> {
         (0..len).map(|_| Self::new(color)).collect()
+    }
+
+    pub fn get(&self) -> Option<Rgba<u8>> {
+        self.color
+    }
+
+    pub fn set(&mut self, color: Option<Rgba<u8>>) {
+        self.color = color;
     }
 }

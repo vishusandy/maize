@@ -21,6 +21,22 @@ pub use crate::render::opts;
 
 pub const DEFAULT_NEIGHBORS: usize = 6;
 
+mod color {
+    use image::Rgba;
+
+    #[allow(dead_code)]
+    pub(crate) const GREEN: Rgba<u8> = Rgba([0, 191, 16, 255]);
+    #[allow(dead_code)]
+    pub(crate) const LIGHT_GREEN: Rgba<u8> = Rgba([108, 224, 117, 255]);
+    #[allow(dead_code)]
+    pub(crate) const YELLOW: Rgba<u8> = Rgba([255, 217, 0, 255]);
+    #[allow(dead_code)]
+    pub(crate) const PURPLE: Rgba<u8> = Rgba([174, 0, 255, 255]);
+}
+
+#[cfg(test)]
+const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
+
 #[cfg(test)]
 fn logger(level: log::LevelFilter) {
     let _ = env_logger::Builder::new()

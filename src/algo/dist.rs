@@ -82,7 +82,7 @@ pub(crate) fn distance_simple<G: Graph>(graph: &G, start: usize) -> Dist {
         let mut frontier2: Vec<usize> = Vec::with_capacity(frontier.len() * G::Node::N);
         for cell in &frontier {
             let d = dist.dist(*cell).unwrap();
-            for link in graph.cell(*cell).links() {
+            for link in graph.node(*cell).links() {
                 if dist.add(*link, d + 1).added() {
                     frontier2.push(*link);
                     if d + 1 > max {
